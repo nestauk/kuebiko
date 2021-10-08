@@ -17,6 +17,10 @@ include .cookiecutter/config
 # Ensure directory to track and log setup state exists
 $(shell mkdir -p .cookiecutter/state)
 
+.PHONY: pycco
+pycco:
+	find kuebiko -name "*.py" | xargs pycco -p -d docs/pycco -s -i
+
 .PHONY: test-setup
 ## Test that everything has been setup
 test-setup:

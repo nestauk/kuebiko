@@ -167,6 +167,9 @@ For each episode there will be a markdown file at `docs/episodes/episode_XX.md` 
 
 Within the source code normal python comments, e.g. `# hello there`, belong in a real (not an example) data science project; however comments with two hashes like `## hello there` are for the narrative purposes of this guide.
 
+To assist with readabilty I have [forked](https://github.com/bishax/pycco) and tweaked the `pycco` literate documentation generator to render these narrative comments.
+To generate these documents: [setup the repo](#setup), run `make pycco`, and open `docs/pycco/index.html` in your browser. These will shortly be published to github pages.
+
 ### Corners cut
 
 This is a MVP of a data science project following the `ds-cookiecutter` workflow but some corners have been cut:

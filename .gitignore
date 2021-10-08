@@ -1,3 +1,6 @@
+# Pycco
+docs/pycco
+
 .cookiecutter/state/
 
 *.lock
