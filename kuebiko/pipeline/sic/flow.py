@@ -1,7 +1,8 @@
 from typing import Dict, List, Union
 
-from metaflow import conda_base, FlowSpec, project, step
+from metaflow import FlowSpec, project, step
 
+## Declare constants in all caps at the top.
 URL = (
     "http://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/"
     "ukstandardindustrialclassificationofeconomicactivities/uksic2007/"
@@ -14,7 +15,6 @@ code_name = str
 code = str
 
 
-@conda_base(libraries={"pandas": "1.2.3", "xlrd": ">=1", "toolz": "0.11.1"})
 @project(name="kuebiko")
 class Sic2007Structure(FlowSpec):
     """SIC 2007 taxonomy structure.
@@ -34,6 +34,8 @@ class Sic2007Structure(FlowSpec):
         subclass_lookup: Lookup from code to name
     """
 
+    ## Type-hints for the data artifacts produced are super helpful!
+    ## Here we've used type aliases to make these easier to interpret.
     url: str
     records: List[Dict[field_name, Union[code, code_name]]]
     section_lookup: Dict[code, code_name]
@@ -44,21 +46,53 @@ class Sic2007Structure(FlowSpec):
 
     @step
     def start(self):
-        """Fetch raw data from ONS website."""
-        ## perspex.pipeline.sic.utils wouldn't work - perspex isn't installed
-        ## in the new conda environment.
+        """Fetch Excel spreadsheet containing taxonomy structure from ONS website."""
+        ## Imports used with a step should always go within a step.
+        ## Because metaflow has the ability to abstract infrastructure then
+        ## different steps may run on different machines with different environments.
+        ## `from kuebiko.pipeline.sic.utils ...` wouldn't work - `kuebiko`
+        ## isn't installed/packaged in the new conda environment.
         from utils import get, excel_to_df
 
+        ## Capturing important values, such as the URL data was fetched from,
+        ## as data artifacts helps debugging previous runs and can monitor important
+        ## changes.
         self.url = URL
+
+        ## Naming an artifact with a leading underscore makes the data artifact
+        ## available to future steps as usual but hides it from a user inspecting
+        ## the results of the run.
+        ## This is useful to avoid users loading the raw data rather than the processed
+        ## data, but it makes it harder to debug/monitor artifacts so it's a case
+        ## of best judgement.
         self._raw_data = excel_to_df(get(self.url))
-        self.next(self.extract)
 
+        self.next(self.transform)
+
+    ## What operations should belong to the same step and when does it make
+    ## sense to split a large step into multiple separate steps?
+    ## Artifacts are persisted when a step finishes executing. After artifacts
+    ## have been persisted successfully, they become available for inspection,
+    ## e.g. `metaflow.Run("Sic2007Structure").start.task.data.url`.
+    ## Also you will be available to
+    ## [resume](https://docs.metaflow.org/metaflow/
+    ## debugging#how-to-use-the-resume-command)
+    ## execution at an arbitrary step.
+    ## Hence keeping steps reasonably small in terms of execution time,
+    ## means you won't lose much work if failures happen; however persisting
+    ## artifacts (particularly using the S3 datastore) and launching tasks
+    ## (particularly using AWS batch) has some overhead so if your steps are
+    ## too small, the overhead starts dominating the total execution time.
+    ## On balance it is good to have steps that logically map to the domain/problem
+    ## so that it is easy to get a high-level understanding of the flow. If
+    ## you notice a large amount of overhead or your flow is hard to debug then
+    ## you can split or merge existing steps accordingly.
     @step
-    def extract(self):
-        """Extract (and clean) data.
+    def transform(self):
+        """Transform data.
 
-        Extract data from excel, normalising SIC codes, and adding extra codes
-        specific to Companies House.
+        Make implicit entries explicit at row-level (fill), normalise SIC
+        codes, and add extra codes specific to Companies House.
         """
         from utils import companies_house_extras, fill, normalise_codes
 
@@ -68,8 +102,15 @@ class Sic2007Structure(FlowSpec):
             .append(companies_house_extras())
         )
         ## One of the big downsides of passing around dataframes is that it's
-        ## easy to lose track of the shape of the data, especially if you
-        ## didn't even write the code in the first place!
+        ## easy to lose track of the shape of the data as it passes through
+        ## various transformation functions, especially if you didn't even
+        ## write the code in the first place!
+        ## Giving functions informative names and docstrings and obeying the
+        ## Single Responsibility Principle can really help the understandability
+        ## of code. What about these functions, are there names and docstrings
+        ## informative enough? What would you change?
+        ## In a later episode we will see how unit tests can also increase the
+        ## readability and transparency of these transformation functions.
 
         self.next(self.end)
 
@@ -78,13 +119,22 @@ class Sic2007Structure(FlowSpec):
         """Generate lookups at each level in the SIC hierarchy."""
         from utils import LEVELS
 
+        ## Where possible avoid saving dataframes as artifacts,
+        ## favouring standard Python data-structures instead.
+        ## Python data-structures do not impose the Pandas dependency on the
+        ## downstream consumer of the data who may be working in an environment
+        ## where Pandas isn't available (e.g. AWS lambda) or may have a
+        ## different version of Pandas which when your artifact is loaded
+        ## may subtly differ or fail to load.
+        ## If dataframes are persisted as regular Python data-structure, the
+        ## downstream consumer can still generate a dataframe if they want.
         # Create individual lookup for each level
         for level in LEVELS:
             lookup: Dict[code, code_name] = (
                 self._data[[level, f"{level}_name"]]
                 .set_index(level)
                 .dropna()
-                .to_dict()[f"{level}_name"],
+                .to_dict()[f"{level}_name"]
             )
             setattr(self, f"{level}_lookup", lookup)
 
