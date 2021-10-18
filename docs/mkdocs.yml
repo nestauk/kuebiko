@@ -63,3 +63,5 @@ nav:
   - Annotated Python source: pycco/index.html
   - Episodes:
       - episodes/index.md
+  - Condensed guides:
+      - "Metaflow": guides/metaflow.md
