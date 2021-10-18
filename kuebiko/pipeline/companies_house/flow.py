@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-from metaflow import conda_base
-from metaflow import current, FlowSpec, Parameter, project, resources, step
+from metaflow import current, FlowSpec, Parameter, project, step
 
 DATA_DUMP_URL_FORMAT = (
     "https://download.companieshouse.gov.uk/"
@@ -15,14 +14,6 @@ field_name = str
 company_number = str
 
 
-## Local (max-workers 4): 5m30s
-## S3 (max-workers 4): 21m
-## Would likely be somewhere between the two running on AWS batch (which
-## requires the S3 datastore) depending on factors such as the number of
-## simultaneous workers and how fast the jobs start.
-
-
-@conda_base(libraries={"pandas": "1.3.3", "toolz": "0.11.1"})
 @project(name="kuebiko")
 class CompaniesHouseDump(FlowSpec):
     """Companies House monthly data dump.
@@ -57,7 +48,7 @@ class CompaniesHouseDump(FlowSpec):
 
     month = Parameter(
         "month",
-        help="month of Companies House data dump",
+        help="Month of Companies House data dump",
         type=int,
         default=DAY_1_OF_LAST_MONTH.month,
     )
@@ -78,7 +69,7 @@ class CompaniesHouseDump(FlowSpec):
 
     @step
     def start(self):
-        """Load raw data"""
+        """Load raw data."""
         import logging
 
         self.urls = [
@@ -135,12 +126,13 @@ class CompaniesHouseDump(FlowSpec):
         self.merge_artifacts(inputs)
         self.next(self.join_foreach)
 
-    @resources(memory=16_000)
     ## No way to separate this out into multiple extra steps to minimise RAM
     ## because a join step must resolve all artifacts. The only solution is to
     ## have a big enough machine.
     @step
     def join_foreach(self, inputs):
+        import logging
+
         from pandas import concat
 
         self.organisations = concat(input.organisations for input in inputs)
@@ -164,7 +156,7 @@ class CompaniesHouseDump(FlowSpec):
                 ## ```
             }
         }
-        print(self.metadata)
+        logging.info(self.metadata)
 
         # Convert artifacts from dataframe to dict
         self.organisations = self.organisations.to_dict()
@@ -173,6 +165,7 @@ class CompaniesHouseDump(FlowSpec):
 
         self.next(self.end)
 
+    ## Join steps have to be distinct, so we can't do the joining logic in `end`
     @step
     def end(self):
         """No-op."""
