@@ -1,14 +1,14 @@
 """Helper functions for NSPL flow."""
 import re
 from io import BytesIO
-from typing import List, Optional
+from typing import Optional
 from zipfile import ZipFile
 
 import pandas as pd
 import requests
 from selenium import webdriver
-from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.webdriver import WebDriver
 
 LOOSE_UK_BOUNDS = {
     "long": (-7.6, 1.7),

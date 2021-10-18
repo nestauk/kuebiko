@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Literal
 
 from metaflow import (
     conda_base,
@@ -12,9 +12,26 @@ from metaflow import (
 
 GEOPORTAL_URL_PREFIX = "https://geoportal.statistics.gov.uk/datasets"
 
+# Type aliases
+postcode = str
+laua_name = str
+laua_code = str
 
-## Using separate conda environment because selenium is a ...
+
 @conda_base(
+    ## In this flow we use Selenium to find the correct download link.
+    ## Imagine it were a more complex dependency than it is, e.g. it takes
+    ## a long time to build/install or it has many transient dependencies
+    ## that may cause conflicts with our main environment.
+    ## Because it's unlikely to be needed to do the pure analysis (which
+    ## occurs in our project's conda environment), we can use
+    ## [`@conda_base`](https://docs.metaflow.org/metaflow/dependencies) to
+    ## create a separate Conda environment and run our flow inside that.
+    ## This minimises the time to install and chance of dependency conflicts
+    ## in the environment that everyone must install, not just the
+    ## machine/person running this pipeline.
+    ## In reality, it's best to stick to using your project's main environment
+    ## and only use Metaflow's conda decorators when you definitely need them.
     libraries={
         "pandas": "1.1.0",
         "selenium": "3.141.0",
@@ -24,7 +41,7 @@ GEOPORTAL_URL_PREFIX = "https://geoportal.statistics.gov.uk/datasets"
 @project(name="kuebiko")
 ## A flows docstring is a great place to document (or refer to)
 ## shortcomings in the data.
-class NSPL(FlowSpec):
+class NsplLookup(FlowSpec):
     """Lookups from postcode to Local Authority Districts and lat-long.
 
     Uses National Statistics Postcode Lookup (NSPL).
@@ -44,6 +61,10 @@ class NSPL(FlowSpec):
         pcd_latlong: Lookup from postcode to latitude and longitude
     """
 
+    ## We can use parameters to allow changes to the flows behaviour without,
+    ## requiring changes to the code. In this case, we can parameterise the
+    ## particular version of the dataset we're using, falling back on a
+    ## sensible default.
     geoportal_dataset = Parameter(
         "geoportal-dataset",
         help=f"Name of dataset in URL at {GEOPORTAL_URL_PREFIX}",
@@ -52,19 +73,27 @@ class NSPL(FlowSpec):
         default="national-statistics-postcode-lookup-august-2021",
     )
 
+    ## If your flow takes more than a minute or two to run then you should
+    ## always add a parameter `test-mode` which will run your flow in test
+    ## mode, e.g. fetch/run a subset of the data.
+    ## This facilitates both efficient code review and automated testing.
+    ## We recommend that by default `test-mode` is either:
+    ## - The logical not of `current.is_production`
+    ##   (so that this is evaluated at the right time, it must be a lambda as below)
+    ## - `True`
     test_mode = Parameter(
         "test-mode",
         help="Whether to run in test mode",
         type=bool,
-        default=True,
+        default=lambda _: not current.is_production,
     )
 
     geoportal_url: str
     download_url: str
-    laua_names: Dict[str, str]
+    laua_names: Dict[laua_code, laua_name]
     laua_year: int
-    pcd_laua: Dict[str, str]
-    pcd_latlong: Dict[str, Dict[str, float]]
+    pcd_laua: Dict[postcode, laua_code]
+    pcd_latlong: Dict[postcode, Dict[Literal["lat", "long"], float]]
 
     @step
     def start(self):
@@ -95,6 +124,8 @@ class NSPL(FlowSpec):
             read_laua_names,
         )
 
+        ## If a flow is run with `--production` (`current.is_production` is
+        ## `True`) then it should NOT run in test mode...
         if self.test_mode and not current.is_production:
             nrows = 1_000
             logging.warning(f"TEST MODE: Constraining to first {nrows} rows!")
@@ -111,7 +142,7 @@ class NSPL(FlowSpec):
         ## If you knew the flow would only ever be run locally with all steps
         ## happening on the same machine then it would _probably_ be ok to do
         ## the above. But we can have the best of both worlds by using
-        ## `requests_cache` to cache requests for us.
+        ## `requests_cache` to cache requests (i.e. downloading the zip) for us.
         ## We can also make sure that if the `--production` flag is used then
         ## the file is re-downloaded rather than risking an invalid cache/local copy.
         if not current.is_production:
@@ -124,8 +155,8 @@ class NSPL(FlowSpec):
             laua_names_tmp = read_laua_names(zipfile)
             self.laua_year = extract_laua_year(laua_names_tmp)
             self.laua_names = laua_names_tmp.to_dict()
-            ## Could have extracted year in `read_laua_names` but we separate
-            ## our concerns...
+            ## We could have extracted year in `read_laua_names` but we keep to
+            ## the single responsibility principle.
 
         self.next(self.data_quality)
 
@@ -138,6 +169,8 @@ class NSPL(FlowSpec):
         ## also during each workflow run.
         ## We will see some potential better approaches to data quality checks
         ## in a later episode.
+
+        # TODO refactor into DQ funs
 
         # Null checks
         has_nulls = self.nspl_data.isna().sum().sum() > 0
@@ -179,4 +212,4 @@ class NSPL(FlowSpec):
 
 
 if __name__ == "__main__":
-    NSPL()
+    NsplLookup()
