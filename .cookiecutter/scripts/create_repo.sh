@@ -15,7 +15,6 @@ function create_gh_repo() {
     # - default branch to `dev`
     # - squash merge as only option
     gh repo create "$GITHUB_ACCOUNT/$REPO_NAME" --"$PROJECT_OPENNESS" -d "$DESCRIPTION" -y \
-    && git push --all \
     && gh api -X PATCH \
     -F default_branch=dev \
     -F allow_merge_commit=false \
