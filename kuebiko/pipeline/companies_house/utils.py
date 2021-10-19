@@ -26,8 +26,17 @@ COLUMN_MAPPINGS = {
 }
 
 
+def read_from_url(url: str) -> pd.DataFrame:
+    """Read Companies House zipped CSV data-dump from url."""
+    return (
+        pd.read_csv(url, usecols=COLUMN_MAPPINGS.keys(), compression="zip")
+        .rename(columns=COLUMN_MAPPINGS)
+        .drop_duplicates()
+    )
+
+
 def process_organisations(ch: pd.DataFrame) -> pd.DataFrame:
-    """"""
+    """Split Companies House dataframe into organisation data."""
     return ch[
         [
             "company_number",
@@ -42,8 +51,8 @@ def process_organisations(ch: pd.DataFrame) -> pd.DataFrame:
     ].set_index("company_number")
 
 
-def process_address(ch: pd.DataFrame):  # , nspl: pd.DataFrame) -> pd.DataFrame:
-    """ """
+def process_address(ch: pd.DataFrame) -> pd.DataFrame:
+    """Split Companies House dataframe into address data."""
     return (
         ch[
             [
@@ -58,14 +67,14 @@ def process_address(ch: pd.DataFrame):  # , nspl: pd.DataFrame) -> pd.DataFrame:
                 "address_postcode",
             ]
         ].rename(columns=lambda x: x.replace("address_", ""))
-        # .merge(nspl, on="postcode")
     ).set_index("company_number")
 
 
 def process_sectors(ch: pd.DataFrame) -> pd.DataFrame:
-    """ """
+    """Split Companies House dataframe into sector data."""
     return (
         ch[["company_number", "sic_1", "sic_2", "sic_3", "sic_4"]]
+        # Melt SIC ranks
         .melt(
             id_vars=["company_number"],
             value_vars=["sic_1", "sic_2", "sic_3", "sic_4"],
@@ -73,7 +82,9 @@ def process_sectors(ch: pd.DataFrame) -> pd.DataFrame:
             value_name="SIC5_full",
         )
         .assign(
+            # Get rank from column name, e.g. "sic_1"
             rank=lambda x: x["rank"].str.slice(-1).astype(int),
+            # Get 4 and 5 digit SIC code from original format "XXXX - Description"
             SIC5_code=lambda x: x["SIC5_full"].str.extract(r"([0-9]*) -"),
             SIC4_code=lambda x: x["SIC5_code"].str.slice(0, 4),
         )

@@ -69,7 +69,11 @@ class CompaniesHouseDump(FlowSpec):
 
     @step
     def start(self):
-        """Load raw data."""
+        """Parse parameters into URL's containing data chunks."""
+        ## It is important to always have a docstring for `start` and `end`
+        ## because their name cannot convey any information about what
+        ## the step does when looking at the DAG structure (without the code),
+        ## e.g. when using the `show` or `output-dot` commands.
         import logging
 
         self.urls = [
@@ -81,41 +85,34 @@ class CompaniesHouseDump(FlowSpec):
             self.urls = self.urls[:1]
             logging.warning("TEST MODE: Constraining to first part of data!")
 
-        self.next(self.get_data, foreach="urls")
+        self.next(self.get_data_chunk, foreach="urls")
 
     @step
-    def get_data(self):
-        """Fetch data chunk into Dataframe."""
-        from pandas import read_csv
+    def get_data_chunk(self):
+        ## Due to the atomic nature of the following few steps in this flow,
+        ## docstrings would just repeat either/both of the step name or the
+        ## docstring of the single functions they tend to call.
+        from utils import read_from_url
 
-        from utils import COLUMN_MAPPINGS
-
-        self.raw = (
-            read_csv(self.input, usecols=COLUMN_MAPPINGS.keys(), compression="zip")
-            .rename(columns=COLUMN_MAPPINGS)
-            .drop_duplicates()
-        )  # TODO refactor
-        self.next(self.do_organisation, self.do_address, self.do_sectors)
+        self.raw = read_from_url(self.input)
+        self.next(self.process_organisation, self.process_address, self.process_sectors)
 
     @step
-    def do_organisation(self):
-        """Process organisations"""
+    def process_organisation(self):
         from utils import process_organisations
 
         self.organisations = process_organisations(self.raw)
         self.next(self.join_branch)
 
     @step
-    def do_address(self):
-        """Process addresses"""
+    def process_address(self):
         from utils import process_address
 
         self.addresses = process_address(self.raw)
         self.next(self.join_branch)
 
     @step
-    def do_sectors(self):
-        """Process sectors"""
+    def process_sectors(self):
         from utils import process_sectors
 
         self.sectors = process_sectors(self.raw)
@@ -123,6 +120,7 @@ class CompaniesHouseDump(FlowSpec):
 
     @step
     def join_branch(self, inputs):
+        """Merge artifacts for a single data chunk."""
         self.merge_artifacts(inputs)
         self.next(self.join_foreach)
 
@@ -131,6 +129,7 @@ class CompaniesHouseDump(FlowSpec):
     ## have a big enough machine.
     @step
     def join_foreach(self, inputs):
+        """Merge artifacts of different data chunks together."""
         import logging
 
         from pandas import concat
@@ -151,13 +150,21 @@ class CompaniesHouseDump(FlowSpec):
                 ## Whether DRY is a good idea is subjective here, is the
                 ## decreased readability of the following worth it?
                 ## ```python
-                ## attr: getattr(self, attr).shape
-                ## for attr in ["organisations", "addresses", "sectors"]
+                ## self.metadata = {
+                ##     "lengths": {
+                ##         attr: getattr(self, attr).shape
+                ##         for attr in ["organisations", "addresses", "sectors"]
+                ##     }
+                ## }
                 ## ```
             }
         }
         logging.info(self.metadata)
 
+        ## It may be more logical to put this conversion from one data type to
+        ## another in the `end` step; however because the data artifacts are
+        ## large this would involve even more overhead when persisting
+        ## artifacts, so we keep it here.
         # Convert artifacts from dataframe to dict
         self.organisations = self.organisations.to_dict()
         self.addresses = self.addresses.to_dict()
