@@ -72,7 +72,6 @@ This is a MVP of a data science project following the `ds-cookiecutter` workflow
 - To avoid covering too much at once, early episodes are missing important things such as tests and data quality and data validation. These are covered a few episodes in and are retrospectively added at that point; **however** in a real project tests should always be written at the same time as the code they test (or even before if you are a proponent of test driven development)!
 - When an episode gets opened for review then the code is only in a state/quality that any other PR might be at when a review is requested. I.e. there will be mistakes/shortcomings so it's up to DAP as a community to help improve things.
 - The [`ds-cookiecutter` template](https://github.com/nestauk/ds-cookiecutter/pull/92) this is based on has not yet been merged (awaiting further reviews)
-- Episode 4 will introduce our own extensions to Metaflow, [`metaflow_custom`](https://github.com/nestauk/metaflow_custom/). Due to a [change in `metaflow` as of `2.4.0`](https://github.com/Netflix/metaflow/pull/691), the package and repo is pending [renaming](https://github.com/nestauk/metaflow_custom/pull/13) to `metaflow_extensions`.
 
 ## Setup
 
