@@ -30,4 +30,4 @@ Besides the [episode guide](episode_01.md) there is neither documentation of how
 -   [`kuebiko/getters/nspl.py`](../pycco/kuebiko/getters/nspl.html)
 -   [`kuebiko/pipeline/companies_house/flow.py`](../pycco/kuebiko/pipeline/companies_house/flow.html)
 -   [`kuebiko/getters/companies_house.py`](../pycco/kuebiko/getters/companies_house.html)
--   [Metaflow guide](../../guides/metaflow.md)
+-   [Metaflow guide](../guides/metaflow.md)
