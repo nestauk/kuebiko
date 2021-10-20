@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>flow.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>flow.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="n">current</span><span class="p">,</span> <span class="n">FlowSpec</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">step</span>
+
+<span class="n">DATA_DUMP_URL_FORMAT</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;https://download.companieshouse.gov.uk/&quot;</span>
+    <span class="s2">&quot;BasicCompanyData-</span><span class="si">{:04d}</span><span class="s2">-</span><span class="si">{:02d}</span><span class="s2">-01-part</span><span class="si">{:d}</span><span class="s2">_</span><span class="si">{:d}</span><span class="s2">.zip&quot;</span>
+<span class="p">)</span>
+<span class="n">DAY_1_OF_LAST_MONTH</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Type aliases</span>
+<span class="n">field_name</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">company_number</span> <span class="o">=</span> <span class="nb">str</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;kuebiko&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">CompaniesHouseDump</span><span class="p">(</span><span class="n">FlowSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Companies House monthly data dump.</span>
+
+<span class="sd">    More information on the data product can be found here:</span>
+<span class="sd">    https://download.companieshouse.gov.uk/en_output.html</span>
+
+<span class="sd">    It is important to note that Companies House adds custom codes alongside SIC:</span>
+<span class="sd">    - 74990 - Non-trading company</span>
+<span class="sd">    - 98000 - Residents property management</span>
+<span class="sd">    - 99999 - Dormant company</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        urls: URLs of data dump downloads</span>
+<span class="sd">        metadata: Metadata about data artifacts</span>
+<span class="sd">        organisations: General information about each organisation</span>
+<span class="sd">        addresses: Address information for each organisation</span>
+<span class="sd">        sectors: Sector (SIC code) information each organisation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">organisations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">company_number</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+    <span class="n">addresses</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">company_number</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+    <span class="n">sectors</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">company_number</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+
+    <span class="n">test_mode</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;test-mode&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to run in test mode (on a small subset of data)&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">month</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;month&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Month of Companies House data dump&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">DAY_1_OF_LAST_MONTH</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">year</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Year of Companies House data dump&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">DAY_1_OF_LAST_MONTH</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">n_chunks</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;n-chunks&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of chunks Companies House data dump is split into&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse parameters into URL&#39;s containing data chunks.&quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>It is important to always have a docstring for <code>start</code> and <code>end</code>
+because their name cannot convey any information about what
+the step does when looking at the DAG structure (without the code),
+e.g. when using the <code>show</code> or <code>output-dot</code> commands.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kn">import</span> <span class="nn">logging</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">urls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">DATA_DUMP_URL_FORMAT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_chunks</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_chunks</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">urls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">urls</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;TEST MODE: Constraining to first part of data!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data_chunk</span><span class="p">,</span> <span class="n">foreach</span><span class="o">=</span><span class="s2">&quot;urls&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">get_data_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Due to the atomic nature of the following few steps in this flow,
+docstrings would just repeat either/both of the step name or the
+docstring of the single functions they tend to call.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">read_from_url</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">read_from_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_organisation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_sectors</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">process_organisation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">process_organisations</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span> <span class="o">=</span> <span class="n">process_organisations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">join_branch</span><span class="p">)</span>
+
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">process_address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">process_address</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span> <span class="o">=</span> <span class="n">process_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">join_branch</span><span class="p">)</span>
+
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">process_sectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">process_sectors</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span> <span class="o">=</span> <span class="n">process_sectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">join_branch</span><span class="p">)</span>
+
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">join_branch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge artifacts for a single data chunk.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merge_artifacts</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">join_foreach</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>No way to separate this out into multiple extra steps to minimise RAM
+because a join step must resolve all artifacts. The only solution is to
+have a big enough machine.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">join_foreach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge artifacts of different data chunks together.&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">logging</span>
+
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">concat</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">organisations</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">addresses</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">sectors</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">merge_artifacts</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;raw&quot;</span><span class="p">])</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>We can save metadata such as dataframe lengths as an artifact, which
+can come in useful for debugging/monitoring/experiment tracking</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;organisations&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="s2">&quot;addresses&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="s2">&quot;sectors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>Whether DRY is a good idea is subjective here, is the
+decreased readability of the following worth it?</p>
+<pre><code class="language-python">self.metadata = {
+    &quot;lengths&quot;: {
+        attr: getattr(self, attr).shape
+        for attr in [&quot;organisations&quot;, &quot;addresses&quot;, &quot;sectors&quot;]
+    }
+}
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>It may be more logical to put this conversion from one data type to
+another in the <code>end</code> step; however because the data artifacts are
+large this would involve even more overhead when persisting
+artifacts, so we keep it here.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="c1"># Convert artifacts from dataframe to dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Join steps have to be distinct, so we can&rsquo;t do the joining logic in <code>end</code></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;No-op.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">CompaniesHouseDump</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

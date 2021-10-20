@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>utils.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>utils.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Companies House data processing.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<span class="n">COLUMN_MAPPINGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;CompanyName&quot;</span><span class="p">:</span> <span class="s2">&quot;company_name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot; CompanyNumber&quot;</span><span class="p">:</span> <span class="s2">&quot;company_number&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;URI&quot;</span><span class="p">:</span> <span class="s2">&quot;uri&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.CareOf&quot;</span><span class="p">:</span> <span class="s2">&quot;address_careof&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.POBox&quot;</span><span class="p">:</span> <span class="s2">&quot;address_pobox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.AddressLine1&quot;</span><span class="p">:</span> <span class="s2">&quot;address_line1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot; RegAddress.AddressLine2&quot;</span><span class="p">:</span> <span class="s2">&quot;address_line2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.PostCode&quot;</span><span class="p">:</span> <span class="s2">&quot;address_postcode&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.PostTown&quot;</span><span class="p">:</span> <span class="s2">&quot;address_town&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.County&quot;</span><span class="p">:</span> <span class="s2">&quot;address_county&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RegAddress.Country&quot;</span><span class="p">:</span> <span class="s2">&quot;address_country&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CompanyCategory&quot;</span><span class="p">:</span> <span class="s2">&quot;company_category&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CompanyStatus&quot;</span><span class="p">:</span> <span class="s2">&quot;company_status&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CountryOfOrigin&quot;</span><span class="p">:</span> <span class="s2">&quot;country_of_origin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DissolutionDate&quot;</span><span class="p">:</span> <span class="s2">&quot;dissolution_date&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IncorporationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;incorporation_date&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SICCode.SicText_1&quot;</span><span class="p">:</span> <span class="s2">&quot;sic_1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SICCode.SicText_2&quot;</span><span class="p">:</span> <span class="s2">&quot;sic_2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SICCode.SicText_3&quot;</span><span class="p">:</span> <span class="s2">&quot;sic_3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SICCode.SicText_4&quot;</span><span class="p">:</span> <span class="s2">&quot;sic_4&quot;</span><span class="p">,</span>
+<span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">read_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read Companies House zipped CSV data-dump from url.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">COLUMN_MAPPINGS</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">COLUMN_MAPPINGS</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">process_organisations</span><span class="p">(</span><span class="n">ch</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Split Companies House dataframe into organisation data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ch</span><span class="p">[</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;company_number&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;company_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;company_category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;company_status&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;country_of_origin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dissolution_date&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;incorporation_date&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;company_number&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">process_address</span><span class="p">(</span><span class="n">ch</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Split Companies House dataframe into address data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">ch</span><span class="p">[</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;company_number&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_careof&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_pobox&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_line1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_line2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_town&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_county&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_country&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;address_postcode&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;address_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;company_number&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">process_sectors</span><span class="p">(</span><span class="n">ch</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Split Companies House dataframe into sector data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">ch</span><span class="p">[[</span><span class="s2">&quot;company_number&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_1&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_2&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_3&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_4&quot;</span><span class="p">]]</span>
+        <span class="c1"># Melt SIC ranks</span>
+        <span class="o">.</span><span class="n">melt</span><span class="p">(</span>
+            <span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;company_number&quot;</span><span class="p">],</span>
+            <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sic_1&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_2&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_3&quot;</span><span class="p">,</span> <span class="s2">&quot;sic_4&quot;</span><span class="p">],</span>
+            <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;rank&quot;</span><span class="p">,</span>
+            <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;SIC5_full&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+            <span class="c1"># Get rank from column name, e.g. &quot;sic_1&quot;</span>
+            <span class="n">rank</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+            <span class="c1"># Get 4 and 5 digit SIC code from original format &quot;XXXX - Description&quot;</span>
+            <span class="n">SIC5_code</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;SIC5_full&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([0-9]*) -&quot;</span><span class="p">),</span>
+            <span class="n">SIC4_code</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;SIC5_code&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;SIC5_code&quot;</span><span class="p">])</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;company_number&quot;</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

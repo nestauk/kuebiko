@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>utils.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>utils.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Helper functions for NSPL flow.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.options</span> <span class="kn">import</span> <span class="n">Options</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.webdriver</span> <span class="kn">import</span> <span class="n">WebDriver</span>
+
+<span class="n">LOOSE_UK_BOUNDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;long&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">7.6</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">),</span>
+    <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">58.7</span><span class="p">),</span>
+<span class="p">}</span>  <span class="c1"># Rough bounds of UK, ok for DQ check</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_download_url</span><span class="p">(</span><span class="n">driver</span><span class="p">:</span> <span class="n">WebDriver</span><span class="p">,</span> <span class="n">geo_portal_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Find download button and extract download URL.&quot;&quot;&quot;</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">implicitly_wait</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Poll DOM for up to 10 seconds when finding elements</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">geo_portal_url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_link_text</span><span class="p">(</span><span class="s2">&quot;Download&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">chrome_driver</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">WebDriver</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Headless Selenium Chrome Driver.&quot;&quot;&quot;</span>
+    <span class="n">chrome_options</span> <span class="o">=</span> <span class="n">Options</span><span class="p">()</span>
+    <span class="n">chrome_options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--headless&quot;</span><span class="p">)</span>
+    <span class="n">chrome_options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--no-sandbox&quot;</span><span class="p">)</span>
+    <span class="n">chrome_options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--disable-gpu&quot;</span><span class="p">)</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">chrome_options</span><span class="p">)</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">set_page_load_timeout</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">set_script_timeout</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">driver</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">download_zip</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZipFile</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Download a URL and load into `ZipFile`.&quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">read_nspl_data</span><span class="p">(</span>
+    <span class="n">zipfile</span><span class="p">:</span> <span class="n">ZipFile</span><span class="p">,</span>
+    <span class="n">nrows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="n">nspl_zip_path</span> <span class="o">=</span> <span class="n">get_nspl_csv_zip_path</span><span class="p">(</span><span class="n">zipfile</span><span class="p">)</span>
+
+    <span class="n">usecols</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;pcds&quot;</span><span class="p">,</span>  <span class="c1"># Postcode</span>
+        <span class="s2">&quot;laua&quot;</span><span class="p">,</span>  <span class="c1"># Local Authority</span>
+        <span class="s2">&quot;lat&quot;</span><span class="p">,</span>  <span class="c1"># Latitude</span>
+        <span class="s2">&quot;long&quot;</span><span class="p">,</span>  <span class="c1"># Longitude</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">zipfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">nspl_zip_path</span><span class="p">),</span>
+        <span class="n">nrows</span><span class="o">=</span><span class="n">nrows</span><span class="p">,</span>
+        <span class="n">usecols</span><span class="o">=</span><span class="n">usecols</span><span class="p">,</span>
+        <span class="n">index_col</span><span class="o">=</span><span class="s2">&quot;pcds&quot;</span><span class="p">,</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">filter_nspl_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Filter out NSPL rows without location data.&quot;&quot;&quot;</span>
+    <span class="n">keep_rows</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">laua</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+        <span class="o">&amp;</span> <span class="n">data</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="o">*</span><span class="n">LOOSE_UK_BOUNDS</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span>
+        <span class="o">&amp;</span> <span class="n">data</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="o">*</span><span class="n">LOOSE_UK_BOUNDS</span><span class="p">[</span><span class="s2">&quot;long&quot;</span><span class="p">])</span>
+    <span class="p">)</span>  <span class="c1"># Null lat-longs are actually coded as (99,0)</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">keep_rows</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">read_laua_names</span><span class="p">(</span>
+    <span class="n">zipfile</span><span class="p">:</span> <span class="n">ZipFile</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+    <span class="n">nspl_zip_path</span> <span class="o">=</span> <span class="n">get_laua_csv_zip_path</span><span class="p">(</span><span class="n">zipfile</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">zipfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">nspl_zip_path</span><span class="p">),</span>
+        <span class="c1"># Ignore Welsh name column</span>
+        <span class="n">usecols</span><span class="o">=</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;W&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="c1"># Get code (CD) column name, e.g. LAD20CD.</span>
+    <span class="c1"># Done dynamically because LAD year may change</span>
+    <span class="n">code_column_name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;CD&quot;</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">code_column_name</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">extract_laua_year</span><span class="p">(</span><span class="n">laua_names</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Extract year from `laua_names` columns.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">laua_names</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_nspl_csv_zip_path</span><span class="p">(</span><span class="n">zipfile</span><span class="p">:</span> <span class="n">ZipFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get the path within the zip folder to the NSPL CSV lookup.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="nb">filter</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Data/NSPL_[A-Z]</span><span class="si">{3}</span><span class="s2">_[0-9]</span><span class="si">{4}</span><span class="s2">_UK.csv&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="n">zipfile</span><span class="o">.</span><span class="n">namelist</span><span class="p">(),</span>
+        <span class="p">)</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_laua_csv_zip_path</span><span class="p">(</span><span class="n">zipfile</span><span class="p">:</span> <span class="n">ZipFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get the path within the zip folder to the LAUA CSV lookup.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="nb">filter</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Documents/LA_UA.*.csv&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="n">zipfile</span><span class="o">.</span><span class="n">namelist</span><span class="p">(),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

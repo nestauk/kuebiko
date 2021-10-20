@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>flow.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>flow.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="n">FlowSpec</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">step</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Declare constants in all caps at the top.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">URL</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;http://www.ons.gov.uk/file?uri=/methodology/classificationsandstandards/&quot;</span>
+    <span class="s2">&quot;ukstandardindustrialclassificationofeconomicactivities/uksic2007/&quot;</span>
+    <span class="s2">&quot;sic2007summaryofstructurtcm6.xls&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Type aliases</span>
+<span class="n">field_name</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">code_name</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">code</span> <span class="o">=</span> <span class="nb">str</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;kuebiko&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Sic2007Structure</span><span class="p">(</span><span class="n">FlowSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SIC 2007 taxonomy structure.</span>
+
+<span class="sd">    Includes extra subclasses used by companies house:</span>
+<span class="sd">    - 74990 - Non-trading company</span>
+<span class="sd">    - 98000 - Residents property management</span>
+<span class="sd">    - 99999 - Dormant company</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        url: Source excel file</span>
+<span class="sd">        records: Taxonomy structure as list of records.</span>
+<span class="sd">        section_lookup: Lookup from code to name</span>
+<span class="sd">        division_lookup: Lookup from code to name</span>
+<span class="sd">        group_lookup: Lookup from code to name</span>
+<span class="sd">        class_lookup: Lookup from code to name</span>
+<span class="sd">        subclass_lookup: Lookup from code to name</span>
+<span class="sd">    &quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Type-hints for the data artifacts produced are super helpful!
+Here we&rsquo;ve used type aliases to make these easier to interpret.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">records</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]]]</span>
+    <span class="n">section_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]</span>
+    <span class="n">division_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]</span>
+    <span class="n">group_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]</span>
+    <span class="n">class_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]</span>
+    <span class="n">subclass_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch Excel spreadsheet containing taxonomy structure from ONS website.&quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Imports used with a step should always go within a step.
+Because metaflow has the ability to abstract infrastructure then
+different steps may run on different machines with different environments.
+<code>from kuebiko.pipeline.sic.utils ...</code> wouldn&rsquo;t work - <code>kuebiko</code>
+isn&rsquo;t installed/packaged in the new conda environment.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">get</span><span class="p">,</span> <span class="n">excel_to_df</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>Capturing important values, such as the URL data was fetched from,
+as data artifacts helps debugging previous runs and can monitor important
+changes.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">URL</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Naming an artifact with a leading underscore makes the data artifact
+available to future steps as usual but hides it from a user inspecting
+the results of the run.
+This is useful to avoid users loading the raw data rather than the processed
+data, but it makes it harder to debug/monitor artifacts so it&rsquo;s a case
+of best judgement.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">_raw_data</span> <span class="o">=</span> <span class="n">excel_to_df</span><span class="p">(</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>What operations should belong to the same step and when does it make
+sense to split a large step into multiple separate steps?
+Artifacts are persisted when a step finishes executing. After artifacts
+have been persisted successfully, they become available for inspection,
+e.g. <code>metaflow.Run("Sic2007Structure").start.task.data.url</code>.
+Also you will be available to
+<a href="https://docs.metaflow.org/metaflow/
+debugging#how-to-use-the-resume-command">resume</a>
+execution at an arbitrary step.
+Hence keeping steps reasonably small in terms of execution time,
+means you won&rsquo;t lose much work if failures happen; however persisting
+artifacts (particularly using the S3 datastore) and launching tasks
+(particularly using AWS batch) has some overhead so if your steps are
+too small, the overhead starts dominating the total execution time.
+On balance it is good to have steps that logically map to the domain/problem
+so that it is easy to get a high-level understanding of the flow. If
+you notice a large amount of overhead or your flow is hard to debug then
+you can split or merge existing steps accordingly.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transform data.</span>
+
+<span class="sd">        Make implicit entries explicit at row-level (fill), normalise SIC</span>
+<span class="sd">        codes, and add extra codes specific to Companies House.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">companies_house_extras</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">normalise_codes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raw_data</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">normalise_codes</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">companies_house_extras</span><span class="p">())</span>
+        <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>One of the big downsides of passing around dataframes is that it&rsquo;s
+easy to lose track of the shape of the data as it passes through
+various transformation functions, especially if you didn&rsquo;t even
+write the code in the first place!
+Giving functions informative names and docstrings and obeying the
+Single Responsibility Principle can really help the understandability
+of code. What about these functions, are there names and docstrings
+informative enough? What would you change?
+In a later episode we will see how unit tests can also increase the
+readability and transparency of these transformation functions.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate lookups at each level in the SIC hierarchy.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">LEVELS</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Where possible avoid saving dataframes as artifacts,
+favouring standard Python data-structures instead.
+Python data-structures do not impose the Pandas dependency on the
+downstream consumer of the data who may be working in an environment
+where Pandas isn&rsquo;t available (e.g. AWS lambda) or may have a
+different version of Pandas which when your artifact is loaded
+may subtly differ or fail to load.
+If dataframes are persisted as regular Python data-structure, the
+downstream consumer can still generate a dataframe if they want.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="c1"># Create individual lookup for each level</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">LEVELS</span><span class="p">:</span>
+            <span class="n">lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">code_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[[</span><span class="n">level</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">]]</span>
+                <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">_lookup&quot;</span><span class="p">,</span> <span class="n">lookup</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">Sic2007Structure</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

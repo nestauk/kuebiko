@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>companies_house.py</title>
+  <link rel="stylesheet" href="../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>companies_house.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Data getters for Companies House data.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="n">Flow</span><span class="p">,</span> <span class="n">Run</span>
+<span class="kn">from</span> <span class="nn">metaflow.exception</span> <span class="kn">import</span> <span class="n">MetaflowNotFound</span>
+
+
+<span class="c1"># Type aliases</span>
+<span class="n">company_number</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">postcode</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">sic_code</span> <span class="o">=</span> <span class="nb">str</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@lru_cache</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">get_run</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Last successful run executed with `--production`.&quot;&quot;&quot;</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">(</span><span class="s2">&quot;CompaniesHouseDump&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="s2">&quot;project_branch:prod&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span> <span class="n">runs</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MetaflowNotFound</span><span class="p">(</span><span class="s2">&quot;Matching run not found&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+
+
+<span class="k">def</span> <span class="nf">company_postcode_lookup</span><span class="p">(</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Run</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">company_number</span><span class="p">,</span> <span class="n">postcode</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Lookup from Companies House number to postcode.</span>
+
+<span class="sd">    A value of `nan` signals that the Company number was in the dataset but a</span>
+<span class="sd">    postcode entry was either not present or a valid postcode could not be</span>
+<span class="sd">    extracted.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        run: Metaflow Run to get data artifacts from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Lookup from Companies House number to postcode</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="n">get_run</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">addresses</span><span class="p">[</span><span class="s2">&quot;postcode&quot;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>One could implement many getters in a PR along with the metaflow pipeline -
+e.g. getters returning full dataframes for the organisation, address, and
+sector tables; however, unless you know the exact interface required then it
+is better to keep things minimal to avoid having to communicate breaking
+changes when needs become clearer later on.
+In this case, we&rsquo;ve implemented two simple getters we&rsquo;re pretty sure are needed.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">company_sic4_lookup</span><span class="p">(</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Run</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">company_number</span><span class="p">,</span> <span class="n">sic_code</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Lookup from Companies House number to 4-digit SIC code.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        run: Metaflow Run to get data artifacts from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Lookup from Companies House number to 4-digit SIC code</span>
+<span class="sd">    &quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Look ma, I turned three lines into one!
+This change isn&rsquo;t <em>too</em> complex but it&rsquo;s likely less readable to most
+which is always something to bear in mind when collaborating.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="p">(</span><span class="n">run</span> <span class="ow">or</span> <span class="n">get_run</span><span class="p">())</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sectors</span><span class="p">[</span><span class="s2">&quot;SIC4_code&quot;</span><span class="p">]</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

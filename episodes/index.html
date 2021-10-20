@@ -280,10 +280,72 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Episode overview
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Episode overview
       </a>
       
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-metaflow-basics-fetching-auxillary-data-from-the-web" class="md-nav__link">
+    1. Metaflow basics - fetching auxillary data from the web
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Metaflow basics - fetching auxillary data from the web">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#important-notes" class="md-nav__link">
+    Important notes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-files" class="md-nav__link">
+    Key files
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="episode_01/" class="md-nav__link">
+        01 - Metaflow basics
+      </a>
     </li>
   
 
@@ -301,10 +363,83 @@
   
   
   
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        Annotated Python source
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Annotated Python source" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Annotated Python source
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
     <li class="md-nav__item">
       <a href="../pycco/" class="md-nav__link">
-        Annotated Python source
+        None
       </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" data-md-state="indeterminate" type="checkbox" id="__nav_4" checked>
+      
+      <label class="md-nav__link" for="__nav_4">
+        Condensed guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Condensed guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Condensed guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/metaflow/" class="md-nav__link">
+        Metaflow
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -328,6 +463,41 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-metaflow-basics-fetching-auxillary-data-from-the-web" class="md-nav__link">
+    1. Metaflow basics - fetching auxillary data from the web
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Metaflow basics - fetching auxillary data from the web">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#important-notes" class="md-nav__link">
+    Important notes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-files" class="md-nav__link">
+    Key files
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -345,7 +515,31 @@
                 
                 <h1 id="episode-overview">Episode overview<a class="headerlink" href="#episode-overview" title="Permanent link">&para;</a></h1>
 <p>Overview of released episodes content, see <a href="https://github.com/nestauk/kuebiko/issues?q=is%3Aopen+label%3Aepisode+sort%3Acreated-asc">issues labeled <code>episode</code></a> for planned episodes.</p>
-<p>No episodes have been released yet.</p>
+<h2 id="1-metaflow-basics-fetching-auxillary-data-from-the-web">1. Metaflow basics - fetching auxillary data from the web<a class="headerlink" href="#1-metaflow-basics-fetching-auxillary-data-from-the-web" title="Permanent link">&para;</a></h2>
+<p>This episode walks through the basics of using Metaflow idiomatically - i.e.
+in a way that suits DAP and its use-cases - by fetching three auxilliary datasets needed:</p>
+<ul>
+<li>Companies House lookups to get the SIC code and address for each company number.</li>
+<li>National Statistics Postcode Lookup (NSPL) which will allow us to identify the Local Authority District (LADs) a company belongs to by matching its postcode.</li>
+<li>SIC taxonomy lookup between names and codes</li>
+</ul>
+<p>In addition, the first set of content (later episodes add more advanced content) is added to a Metaflow guide.</p>
+<h3 id="important-notes">Important notes<a class="headerlink" href="#important-notes" title="Permanent link">&para;</a></h3>
+<p>There are missing pieces to this episode that a data-science PR should have.
+The most obvious of these is the absence of tests which are the subject of episode 3.
+Tests for the three pipelines of this episode will be added in the testing episode in order to keep the content of this episode focused around writing basic Metaflow flows and getters.</p>
+<p>Besides the <a href="episode_01/">episode guide</a> there is neither documentation of how to run the flows or version-controlled configuration for flow parameters. This will be addressed in episode 4.</p>
+<h3 id="key-files">Key files<a class="headerlink" href="#key-files" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="episode_01/">Episode 1 guide</a></li>
+<li><a href="../pycco/kuebiko/pipeline/sic/flow.html"><code>kuebiko/pipeline/sic/flow.py</code></a></li>
+<li><a href="../pycco/kuebiko/getters/sic.html"><code>kuebiko/getters/sic.py</code></a></li>
+<li><a href="../pycco/kuebiko/pipeline/nspl/flow.html"><code>kuebiko/pipeline/nspl/flow.py</code></a></li>
+<li><a href="../pycco/kuebiko/getters/nspl.html"><code>kuebiko/getters/nspl.py</code></a></li>
+<li><a href="../pycco/kuebiko/pipeline/companies_house/flow.html"><code>kuebiko/pipeline/companies_house/flow.py</code></a></li>
+<li><a href="../pycco/kuebiko/getters/companies_house.html"><code>kuebiko/getters/companies_house.py</code></a></li>
+<li><a href="../../guides/metaflow.md">Metaflow guide</a></li>
+</ul>
                 
               
               
@@ -386,13 +580,13 @@
       
       
         
-        <a href="../pycco/" class="md-footer__link md-footer__link--next" aria-label="Next: Annotated Python source" rel="next">
+        <a href="episode_01/" class="md-footer__link md-footer__link--next" aria-label="Next: 01 - Metaflow basics" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Annotated Python source
+              01 - Metaflow basics
             </div>
           </div>
           <div class="md-footer__button md-icon">

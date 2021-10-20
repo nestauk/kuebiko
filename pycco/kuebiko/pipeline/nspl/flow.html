@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>flow.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>flow.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">conda_base</span><span class="p">,</span>
+    <span class="n">current</span><span class="p">,</span>
+    <span class="n">FlowSpec</span><span class="p">,</span>
+    <span class="n">Parameter</span><span class="p">,</span>
+    <span class="n">project</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">GEOPORTAL_URL_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;https://geoportal.statistics.gov.uk/datasets&quot;</span>
+
+<span class="c1"># Type aliases</span>
+<span class="n">postcode</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">laua_name</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">laua_code</span> <span class="o">=</span> <span class="nb">str</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@conda_base</span><span class="p">(</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>In this flow we use Selenium to find the correct download link.
+Imagine it were a more complex dependency than it is, e.g. it takes
+a long time to build/install or it has many transient dependencies
+that may cause conflicts with our main environment.
+Because it&rsquo;s unlikely to be needed to do the pure analysis (which
+occurs in our project&rsquo;s conda environment), we can use
+<a href="https://docs.metaflow.org/metaflow/dependencies"><code>@conda_base</code></a> to
+create a separate Conda environment and run our flow inside that.
+This minimises the time to install and chance of dependency conflicts
+in the environment that everyone must install, not just the
+machine/person running this pipeline.
+In reality, it&rsquo;s best to stick to using your project&rsquo;s main environment
+and only use Metaflow&rsquo;s conda decorators when you definitely need them.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">libraries</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;pandas&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;selenium&quot;</span><span class="p">:</span> <span class="s2">&quot;3.141.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;requests-cache&quot;</span><span class="p">:</span> <span class="s2">&quot;0.4.13&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;kuebiko&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>A flows docstring is a great place to document (or refer to)
+shortcomings in the data.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">NsplLookup</span><span class="p">(</span><span class="n">FlowSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lookups from postcode to Local Authority Districts and lat-long.</span>
+
+<span class="sd">    Uses National Statistics Postcode Lookup (NSPL).</span>
+<span class="sd">    Excludes postcodes that do not have an assigned output area (OA),</span>
+<span class="sd">    and therefore no Local Authority District coding.</span>
+<span class="sd">    Postcodes in the Channel Islands and Isle of Man both have lat-longs of</span>
+<span class="sd">    `(99.999999, 0.000000)` and have pseudo Local Authorit district codes of</span>
+<span class="sd">    &quot;L99999999&quot; and &quot;M99999999&quot; respectively, this does not match up with</span>
+<span class="sd">    other datasets and therefore have been excluded.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        geoportal_url: Full URL of dataset in gov.uk geoportal</span>
+<span class="sd">        download_url: Download URL of dataset</span>
+<span class="sd">        laua_names: Lookup from laua code to name</span>
+<span class="sd">        laua_year: Year LAUA names and codes correspond to</span>
+<span class="sd">        pcd_laua: Lookup from postcode to LAUA</span>
+<span class="sd">        pcd_latlong: Lookup from postcode to latitude and longitude</span>
+<span class="sd">    &quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>We can use parameters to allow changes to the flows behaviour without,
+requiring changes to the code. In this case, we can parameterise the
+particular version of the dataset we&rsquo;re using, falling back on a
+sensible default.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">geoportal_dataset</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;geoportal-dataset&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Name of dataset in URL at </span><span class="si">{</span><span class="n">GEOPORTAL_URL_PREFIX</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;national-statistics-postcode-lookup-august-2021&quot;</span><span class="p">,</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>If your flow takes more than a minute or two to run then you should
+always add a parameter <code>test-mode</code> which will run your flow in test
+mode, e.g. fetch/run a subset of the data.
+This facilitates both efficient code review and automated testing.
+We recommend that by default <code>test-mode</code> is either:
+- The logical not of <code>current.is_production</code>
+  (so that this is evaluated at the right time, it must be a lambda as below)
+- <code>True</code></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">test_mode</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;test-mode&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to run in test mode&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">geoportal_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">download_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">laua_names</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">laua_code</span><span class="p">,</span> <span class="n">laua_name</span><span class="p">]</span>
+    <span class="n">laua_year</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">pcd_laua</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">postcode</span><span class="p">,</span> <span class="n">laua_code</span><span class="p">]</span>
+    <span class="n">pcd_latlong</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">postcode</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get dynamically rendered download link.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">chrome_driver</span><span class="p">,</span>
+            <span class="n">find_download_url</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">geoportal_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GEOPORTAL_URL_PREFIX</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">geoportal_dataset</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">with</span> <span class="n">chrome_driver</span><span class="p">()</span> <span class="k">as</span> <span class="n">driver</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">download_url</span> <span class="o">=</span> <span class="n">find_download_url</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geoportal_url</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">)</span>
+
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Download zipped NSPL collection, extracting main lookup &amp; LAUA names.&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">logging</span>
+
+        <span class="kn">import</span> <span class="nn">requests_cache</span>
+
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">download_zip</span><span class="p">,</span>
+            <span class="n">extract_laua_year</span><span class="p">,</span>
+            <span class="n">filter_nspl_data</span><span class="p">,</span>
+            <span class="n">read_nspl_data</span><span class="p">,</span>
+            <span class="n">read_laua_names</span><span class="p">,</span>
+        <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>If a flow is run with <code>--production</code> (<code>current.is_production</code> is
+<code>True</code>) then it should NOT run in test mode&hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">:</span>
+            <span class="n">nrows</span> <span class="o">=</span> <span class="mi">1_000</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TEST MODE: Constraining to first </span><span class="si">{</span><span class="n">nrows</span><span class="si">}</span><span class="s2"> rows!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nrows</span> <span class="o">=</span> <span class="kc">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Downloading a large zip each time we iterate is inefficient.
+With other expensive tasks we can split them into different
+metaflow steps and <code>resume</code> part-way through our flow; however
+if we download a zip in one step and process it in another then
+this requires that the two steps run on the same machine. One of
+the big benefits of metaflow is how easy it is to run a pipeline in
+a distributed manner.
+If you knew the flow would only ever be run locally with all steps
+happening on the same machine then it would <em>probably</em> be ok to do
+the above. But we can have the best of both worlds by using
+<code>requests_cache</code> to cache requests (i.e. downloading the zip) for us.
+We can also make sure that if the <code>--production</code> flag is used then
+the file is re-downloaded rather than risking an invalid cache/local copy.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">:</span>
+            <span class="n">requests_cache</span><span class="o">.</span><span class="n">install_cache</span><span class="p">(</span><span class="s2">&quot;nspl_zip_cache&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">download_zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipfile</span><span class="p">:</span>
+            <span class="c1"># Load main postcode lookup</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span> <span class="o">=</span> <span class="n">read_nspl_data</span><span class="p">(</span><span class="n">zipfile</span><span class="p">,</span> <span class="n">nrows</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">filter_nspl_data</span><span class="p">)</span>
+
+            <span class="c1"># LAUA lookup from codes to names</span>
+            <span class="n">laua_names_tmp</span> <span class="o">=</span> <span class="n">read_laua_names</span><span class="p">(</span><span class="n">zipfile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">laua_year</span> <span class="o">=</span> <span class="n">extract_laua_year</span><span class="p">(</span><span class="n">laua_names_tmp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">laua_names</span> <span class="o">=</span> <span class="n">laua_names_tmp</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>We could have extracted year in <code>read_laua_names</code> but we keep to
+the single responsibility principle.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_quality</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">data_quality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Data quality checks.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">LOOSE_UK_BOUNDS</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>It is always important to check data-quality, both during EDA but
+also during each workflow run.
+We will see some potential better approaches to data quality checks
+in a later episode.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="c1"># TODO refactor into DQ funs</span>
+
+        <span class="c1"># Null checks</span>
+        <span class="n">has_nulls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">has_nulls</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;Nulls detected&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Postcode validity</span>
+        <span class="c1"># Choose very simple postcode verification as NSPL is a fairly</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>authoritative source that may update faster than a precise regex</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">POSTCODE_REGEX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^([A-Z]{1,2}[A-Z\d]{0,2}? ?\d[A-Z]</span><span class="si">{2}</span><span class="s2">)$&quot;</span>
+        <span class="n">valid_pcds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">POSTCODE_REGEX</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_pcds</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid postcodes detected: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">valid_pcds</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Check we have names for all laua codes</span>
+        <span class="n">nspl_laua_cds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">laua</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
+        <span class="n">laua_names_cds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">laua_names</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">laua_diff</span> <span class="o">=</span> <span class="n">nspl_laua_cds</span> <span class="o">-</span> <span class="n">laua_names_cds</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">laua_diff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LAUA do not match: </span><span class="si">{</span><span class="n">laua_diff</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check lat-longs are in the UK</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="o">*</span><span class="n">LOOSE_UK_BOUNDS</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="o">*</span><span class="n">LOOSE_UK_BOUNDS</span><span class="p">[</span><span class="s2">&quot;long&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Individual lookups reduce the amount of data each getter needs to
+download for the price of slightly more serialisation overhead and
+storage when the flow is originally run</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">pcd_laua</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="p">[</span><span class="s2">&quot;laua&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pcd_latlong</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="p">[[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span>  <span class="c1"># Don&#39;t expose the pandas dataframe as a final artifact</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">NsplLookup</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

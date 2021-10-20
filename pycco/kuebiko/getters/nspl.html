@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>nspl.py</title>
+  <link rel="stylesheet" href="../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>nspl.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Data getters providing lookups from postcode to various geographies.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="n">Flow</span><span class="p">,</span> <span class="n">Run</span>
+<span class="kn">from</span> <span class="nn">metaflow.exception</span> <span class="kn">import</span> <span class="n">MetaflowNotFound</span>
+
+
+<span class="c1"># Type aliases</span>
+<span class="n">postcode</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">laua_name</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="n">laua_code</span> <span class="o">=</span> <span class="nb">str</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@lru_cache</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>This is exactly the same function we wrote for the SIC getter but with a
+different flow name. In order to keep things DRY, this should be factored
+out into a utility function!</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_run</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Last successful run executed with `--production`.&quot;&quot;&quot;</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">(</span><span class="s2">&quot;NsplLookup&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="s2">&quot;project_branch:prod&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span> <span class="n">runs</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MetaflowNotFound</span><span class="p">(</span><span class="s2">&quot;Matching run not found&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>The following getters also contain a lot of repetition, a sign that more
+utility functions may be needed. In the case of getters we need to balance
+keeping things DRY with being explicit - a little repetition is better than
+making it harder for someone to see what data is available.
+You&rsquo;d have to be a bit bonkers to think the following was worth the trade-off&hellip;</p>
+<pre><code class="language-python">def dynamically_generate_getter(artifact):
+    def inner(run: Optional[Run] = None):
+        if run is None:
+            run = get_run()
+        return getattr(run.data, artifact)
+    return inner
+
+functions = [
+    &quot;postcode_laua_lookup&quot;,
+    &quot;postcode_latlong_lookup&quot;,
+    &quot;laua_code_names_lookup&quot;,
+]
+artifacts = [&quot;pcd_laua&quot;, &quot;pcd_latlong&quot;, &quot;laua_names&quot;]
+for function, artifact in zip(functions, artifacts):
+    f = dynamically_generate_getter(artifact)
+    locals()[function] = f
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">postcode_laua_lookup</span><span class="p">(</span><span class="n">run</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Run</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">postcode</span><span class="p">,</span> <span class="n">laua_code</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Lookup from postcode to Local Authority.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        run: Metaflow Run to get data artifacts from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Lookup from postcode to Local Authority code</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="n">get_run</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pcd_laua</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">postcode_latlong_lookup</span><span class="p">(</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Run</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">postcode</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Lookup from postcode to Latitude and Longitude.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        run: Metaflow Run to get data artifacts from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Lookup from postcode to lat-long</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="n">get_run</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pcd_latlong</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">laua_code_names_lookup</span><span class="p">(</span><span class="n">run</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Run</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">laua_code</span><span class="p">,</span> <span class="n">laua_name</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Lookup from Local Authority code to Local Authority name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        run: Metaflow Run to get data artifacts from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Lookup from Local Authority code to name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="n">get_run</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">run</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">laua_names</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
