@@ -63,5 +63,6 @@ nav:
   - Annotated Python source: pycco/index.html
   - Episodes:
       - episodes/index.md
+      - "01 - Metaflow basics": episodes/episode_01.md
   - Condensed guides:
       - "Metaflow": guides/metaflow.md
