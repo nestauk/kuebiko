@@ -14,3 +14,6 @@ pytest
 pre-commit
 pre-commit-hooks
 pycco @ git+https://github.com/bishax/pycco
+mkdocs
+mkdocs-material
+mkdocs-material-extensions

@@ -36,6 +36,7 @@ repos:
         name: Check Yaml
         entry: check-yaml
         language: system
+        exclude: docs/mkdocs.yml
         types: [yaml]
       # - id: reorder-python-imports
       #   name: Reorder python imports

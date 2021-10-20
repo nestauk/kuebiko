@@ -17,9 +17,18 @@ include .cookiecutter/config
 # Ensure directory to track and log setup state exists
 $(shell mkdir -p .cookiecutter/state)
 
-.PHONY: pycco
+.PHONY: build-guide-docs
+build-guide-docs: pycco
+	cd docs/ && mkdocs build
+
+.PHONY: serve-guide-docs
+serve-guide-docs: pycco
+	cd docs/ && mkdocs serve
+
+.PHONY:
 pycco:
-	find kuebiko -name "*.py" | xargs pycco -p -d docs/pycco -s -i
+	rm -r docs/guide/pycco || true
+	find kuebiko -name "*.py" | xargs pycco -p -d docs/guide/pycco -s -i
 
 .PHONY: test-setup
 ## Test that everything has been setup

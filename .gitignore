@@ -1,5 +1,9 @@
+docs/site
+
 # Pycco
-docs/pycco
+docs/pycco.css
+docs/guide/pycco
+
 
 .cookiecutter/state/
 

@@ -1,0 +1,66 @@
+site_name: "ds-cookiecutter guide"
+site_description: An example ds-cookiecutter project with associated guides for idiomatic development.
+site_url: https://nestauk.github.io/kuebiko
+repo_name: nestauk/kuebiko
+repo_url: https://github.com/nestauk/kuebiko
+edit_uri: edit/master/docs/guide
+docs_dir: guide
+extra:
+  homepage: https://nestauk.github.io/kuebiko
+theme:
+  name: material
+  # logo: favicon.ico
+  favicon: favicon.ico
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.expand
+    - navigation.indexes
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: pink
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: amber
+      accent: pink
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.tabbed
+  - def_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid-experimental
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - footnotes
+  - pymdownx.highlight
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid-experimental
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - attr_list
+# extra_css:
+#   - css/extra.css
+nav:
+  - Home: index.md
+  - Episodes:
+      - episodes/index.md
+  - Annotated Python source:
+      - pycco/index.html
