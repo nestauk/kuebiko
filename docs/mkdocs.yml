@@ -60,7 +60,6 @@ markdown_extensions:
 #   - css/extra.css
 nav:
   - Home: index.md
+  - Annotated Python source: pycco/index.html
   - Episodes:
       - episodes/index.md
-  - Annotated Python source:
-      - pycco/index.html
