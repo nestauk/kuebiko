@@ -8,14 +8,14 @@ For the guide material [start here (markdown)](docs/guide/index.md) or [here (on
 
 ## Setup
 
-- Meet the data science cookiecutter [requirements](http://nestauk.github.io/ds-cookiecutter/quickstart), in brief:
-  - Install: `git-crypt`, `direnv`, and `conda`
-  - Have a Nesta AWS account configured with `awscli`
-- Run `make install` to configure the development environment:
-  - Setup the conda environment
-  - Configure pre-commit
-  - Configure metaflow to use AWS
-- Run `make serve-guide-docs` to build and serve documentation locally
+-   Meet the data science cookiecutter [requirements](http://nestauk.github.io/ds-cookiecutter/quickstart), in brief:
+    -   Install: `git-crypt`, `direnv`, and `conda`
+    -   Have a Nesta AWS account configured with `awscli`
+-   Run `make install` to configure the development environment:
+    -   Setup the conda environment
+    -   Configure pre-commit
+    -   Configure metaflow to use AWS
+-   Run `make serve-guide-docs` to build and serve documentation locally
 
 ---
 

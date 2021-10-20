@@ -60,3 +60,9 @@ repos:
     rev: v2.1.2
     hooks:
       - id: prettier
+        name: Prettier (markdown)
+        args: ["--tab-width", "4"]
+        files: ".md"
+      - id: prettier
+        name: Prettier (except markdown)
+        exclude: ".md"

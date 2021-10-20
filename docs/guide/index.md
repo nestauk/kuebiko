@@ -20,17 +20,17 @@ Some specific questions they have are:
 
 Below is a list of provisional episodes. See [issues labeled `episode`](https://github.com/nestauk/kuebiko/issues?q=is%3Aopen+label%3Aepisode+sort%3Acreated-asc) for more information and more timely updates.
 
-- [x] 0. Setup
-- [ ] 1. Metaflow basics - fetching auxiliary data from the web
-- [ ] 2. Getting data from SQL - fetching NOMIS auxiliary data
-- [ ] 3. Critical coding - web-scraping utilities
-- [ ] 4. Metaflow on AWS batch - scaling a web-scraper
-- [ ] 5. Advanced data getters - extracting and explored scraped data
-- [ ] 6. Data analysis - answering stakeholders first 3 questions
-- [ ] 7. Perfect is the enemy of good - Company description extraction
-- [ ] 8. Metaflow on AWS batch with a GPU - transformers
-- [ ] 9. The fine line between analysis and pipeline - answering stakeholders final question
-- [ ] 10. Refactoring
+-   [x] 0. Setup
+-   [ ] 1. Metaflow basics - fetching auxiliary data from the web
+-   [ ] 2. Getting data from SQL - fetching NOMIS auxiliary data
+-   [ ] 3. Critical coding - web-scraping utilities
+-   [ ] 4. Metaflow on AWS batch - scaling a web-scraper
+-   [ ] 5. Advanced data getters - extracting and explored scraped data
+-   [ ] 6. Data analysis - answering stakeholders first 3 questions
+-   [ ] 7. Perfect is the enemy of good - Company description extraction
+-   [ ] 8. Metaflow on AWS batch with a GPU - transformers
+-   [ ] 9. The fine line between analysis and pipeline - answering stakeholders final question
+-   [ ] 10. Refactoring
 
 Further episodes may be added as further use-cases arise, further guidelines are developed or new technologies adopted (e.g. AWS step-functions).
 
@@ -48,24 +48,24 @@ Normal python comments, e.g. `# hello there`, belong in a real (not an example) 
 
 This is a MVP of a data science project following the `ds-cookiecutter` workflow but some corners have been cut:
 
-- The problem statement is a bit contrived.
+-   The problem statement is a bit contrived.
 
-  It was chosen in order to demonstrate a variety of day-to-day aspects of data science development whilst keeping the overall level of content as small as possible to aid accessibility.
+    It was chosen in order to demonstrate a variety of day-to-day aspects of data science development whilst keeping the overall level of content as small as possible to aid accessibility.
 
-- We present and discuss complete, but not necessarily final, features -
-  e.g. models work end-to-end but may only be simple.
+-   We present and discuss complete, but not necessarily final, features -
+    e.g. models work end-to-end but may only be simple.
 
-  A detailed iterative workflow such as exploring in notebooks and then refactoring into modules, is not covered because:
+    A detailed iterative workflow such as exploring in notebooks and then refactoring into modules, is not covered because:
 
-  1. This would further bloat the already ambitious scope of this repository
-  2. Everyone works differently and projects are nuanced therefore it does not pay to be opinonated here
+    1. This would further bloat the already ambitious scope of this repository
+    2. Everyone works differently and projects are nuanced therefore it does not pay to be opinonated here
 
-  _There are plans to record a video demoing and discussing one possible workflow_
+    _There are plans to record a video demoing and discussing one possible workflow_
 
-- Development/commit order is chosen for episodic release not necessarily the order which a real project would have
+-   Development/commit order is chosen for episodic release not necessarily the order which a real project would have
 
 ### Miscellaneous notes
 
-- To avoid covering too much at once, early episodes are missing important things such as tests and data quality and data validation. These are covered a few episodes in and are retrospectively added at that point; **however** in a real project tests should always be written at the same time as the code they test (or even before if you are a proponent of test driven development)!
-- When an episode gets opened for review then the code is only in a state/quality that any other PR might be at when a review is requested. I.e. there will be mistakes/shortcomings so it's up to DAP as a community to help improve things.
-- The [`ds-cookiecutter` template](https://github.com/nestauk/ds-cookiecutter/pull/92) this is based on has not yet been merged (awaiting further reviews)
+-   To avoid covering too much at once, early episodes are missing important things such as tests and data quality and data validation. These are covered a few episodes in and are retrospectively added at that point; **however** in a real project tests should always be written at the same time as the code they test (or even before if you are a proponent of test driven development)!
+-   When an episode gets opened for review then the code is only in a state/quality that any other PR might be at when a review is requested. I.e. there will be mistakes/shortcomings so it's up to DAP as a community to help improve things.
+-   The [`ds-cookiecutter` template](https://github.com/nestauk/ds-cookiecutter/pull/92) this is based on has not yet been merged (awaiting further reviews)
