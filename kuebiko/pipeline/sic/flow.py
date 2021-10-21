@@ -47,16 +47,16 @@ class Sic2007Structure(FlowSpec):
     @step
     def start(self):
         """Fetch Excel spreadsheet containing taxonomy structure from ONS website."""
-        ## Imports used with a step should always go within a step.
+        ## **Imports used with a step should always go within a step.**
         ## Because metaflow has the ability to abstract infrastructure then
         ## different steps may run on different machines with different environments.
-        ## `from kuebiko.pipeline.sic.utils ...` wouldn't work - `kuebiko`
-        ## isn't installed/packaged in the new conda environment.
         from utils import get, excel_to_df
 
-        ## Capturing important values, such as the URL data was fetched from,
-        ## as data artifacts helps debugging previous runs and can monitor important
-        ## changes.
+        ## **Capture important values as data artifacts**, such as the URL data
+        ## was fetched from. This helps debugging previous runs and can monitor
+        ## important changes.<br>
+        ## Though be wary of doing this uneccessarily for large values due to
+        ## the overhead of persisting artifacts.
         self.url = URL
 
         ## Naming an artifact with a leading underscore makes the data artifact
@@ -70,7 +70,7 @@ class Sic2007Structure(FlowSpec):
         self.next(self.transform)
 
     ## What operations should belong to the same step and when does it make
-    ## sense to split a large step into multiple separate steps?
+    ## sense to split a large step into multiple separate steps?<br>
     ## Artifacts are persisted when a step finishes executing. After artifacts
     ## have been persisted successfully, they become available for inspection,
     ## e.g. `metaflow.Run("Sic2007Structure").start.task.data.url`.
@@ -83,8 +83,8 @@ class Sic2007Structure(FlowSpec):
     ## artifacts (particularly using the S3 datastore) and launching tasks
     ## (particularly using AWS batch) has some overhead so if your steps are
     ## too small, the overhead starts dominating the total execution time.
-    ## On balance it is good to have steps that logically map to the domain/problem
-    ## so that it is easy to get a high-level understanding of the flow. If
+    ## **On balance it is good to have steps that logically map to the domain/problem
+    ## so that it is easy to get a high-level understanding of the flow.** If
     ## you notice a large amount of overhead or your flow is hard to debug then
     ## you can split or merge existing steps accordingly.
     @step
@@ -96,21 +96,22 @@ class Sic2007Structure(FlowSpec):
         """
         from utils import companies_house_extras, fill, normalise_codes
 
+        ## One of the big downsides of passing around dataframes is that it's
+        ## easy to lose track of the shape of the data as it passes through
+        ## various transformation functions, especially if you didn't even
+        ## write the code in the first place!<br>
+        ## **Give functions informative names and docstrings and obey the
+        ## Single Responsibility Principle** to really help the understandability
+        ## of code.<br>
+        ## What about these functions, are there names and docstrings
+        ## informative enough? What would you change?<br>
+        ## In a later episode we will see how unit tests can also increase the
+        ## readability and transparency of these transformation functions.
         self._data = (
             self._raw_data.pipe(fill)
             .pipe(normalise_codes)
             .append(companies_house_extras())
         )
-        ## One of the big downsides of passing around dataframes is that it's
-        ## easy to lose track of the shape of the data as it passes through
-        ## various transformation functions, especially if you didn't even
-        ## write the code in the first place!
-        ## Giving functions informative names and docstrings and obeying the
-        ## Single Responsibility Principle can really help the understandability
-        ## of code. What about these functions, are there names and docstrings
-        ## informative enough? What would you change?
-        ## In a later episode we will see how unit tests can also increase the
-        ## readability and transparency of these transformation functions.
 
         self.next(self.end)
 
@@ -119,8 +120,8 @@ class Sic2007Structure(FlowSpec):
         """Generate lookups at each level in the SIC hierarchy."""
         from utils import LEVELS
 
-        ## Where possible avoid saving dataframes as artifacts,
-        ## favouring standard Python data-structures instead.
+        ## Where possible **avoid saving dataframes as artifacts**,
+        ## favouring standard Python data-structures instead.<br>
         ## Python data-structures do not impose the Pandas dependency on the
         ## downstream consumer of the data who may be working in an environment
         ## where Pandas isn't available (e.g. AWS lambda) or may have a
