@@ -14,8 +14,8 @@ laua_code = str
 
 @lru_cache()
 ## This is exactly the same function we wrote for the SIC getter but with a
-## different flow name. In order to keep things DRY, this should be factored
-## out into a utility function!
+## different flow name. In order to keep things [DRY](/kuebiko/glossary/#DRY),
+## this would ideally be factored out into a utility function!
 def get_run():
     """Last successful run executed with `--production`."""
     runs = Flow("NsplLookup").runs("project_branch:prod")
