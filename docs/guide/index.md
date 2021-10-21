@@ -29,7 +29,7 @@ Some specific questions they have are:
 Below is a list of provisional episodes. See [issues labeled `episode`](https://github.com/nestauk/kuebiko/issues?q=is%3Aopen+label%3Aepisode+sort%3Acreated-asc) for more information and more timely updates.
 
 -   [x] 0. Setup
--   [ ] 1. Metaflow basics - fetching auxiliary data from the web
+-   [x] 1. Metaflow basics - fetching auxiliary data from the web
 -   [ ] 2. Getting data from SQL - fetching NOMIS auxiliary data
 -   [ ] 3. Critical coding - web-scraping utilities
 -   [ ] 4. Metaflow on AWS batch - scaling a web-scraper
