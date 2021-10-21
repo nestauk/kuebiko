@@ -18,7 +18,8 @@ Lets recap a few Metaflow commands:
 -   `python kuebiko/pipeline/sic/flow.py dump <run id>/end` will dump a summary of the artifacts for a given run ID.
 
 !!! info "Metaflow defaults"
-`.envrc` specifies:
+
+    `.envrc` specifies:
 
     - `METAFLOW_DEFAULT_DATASTORE=local`
     - `METAFLOW_PROFILE=ds-cookiecutter`
