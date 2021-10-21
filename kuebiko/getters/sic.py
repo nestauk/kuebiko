@@ -12,11 +12,14 @@ code_name = str
 code = str
 
 
-## Examining past runs involves making network request and database queries,
+## Examining past runs involves making network requests and database queries,
 ## caching means that we only need to pay this cost once.
 @lru_cache()
 def get_run():
     """Last successful run executed with `--production`."""
+    ## `project_branch:prod` is the tag corresponding to running a flow with
+    ## the `--production` flag. Without `--production` the equivalent tag
+    ## relates to your username, e.g. `project_branch:user.alex`.
     runs = Flow("Sic2007Structure").runs("project_branch:prod")
     try:
         return next(filter(lambda run: run.successful, runs))
@@ -36,6 +39,7 @@ def get_run():
 ## - Using [`@project`](https://docs.metaflow.org/
 ## going-to-production-with-metaflow/
 ## coordinating-larger-metaflow-projects#the-project-decorator)
+##   on a Flow
 ## - Have `kuebiko/__init__.py` choose the project's namespace -
 ##  `metaflow.namespace("project:kuebiko")` in this case
 ## - Write getters that fetch 'production' artifacts but are extensible
