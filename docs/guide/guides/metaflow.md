@@ -1,11 +1,40 @@
 # Metaflow Guide
 
-## Use-cases
+## Recap: What can Metaflow do for you?
 
--   Share results (particularly long-running/complex)
--   Version results
--   Computing at scale
--   Dependencies
+### Data versioning
+
+Each execution of a Flow has a unique run ID which data artifacts are stored under.
+
+The artifacts and metadata of each run can be fetched using the [Metaflow client API](https://docs.metaflow.org/metaflow/client).
+
+### Scalable computing
+
+Metaflow abstracts infrastructure making horizontally and vertically scalable cloud computing easily available to Data Scientists.
+
+In some (not all) cases it's as easy as adding `--with batch` to the end of the command to run a flow!
+
+### Sharing results
+
+Data artifacts of runs can be stored and versioned not only on your machine but also to AWS S3, meaning you can share your results easily.
+
+### Get you out of dependency hell
+
+Ever run into a situation where one part of a project needs a package that conflicts with another?
+
+Metaflow allows you to [specify dependencies at the flow level](https://docs.metaflow.org/metaflow/dependencies) and automatically builds a Conda environment and runs your flow in it.
+
+### Make your pipelines easier to understand
+
+Expressing a script as a DAG instead makes things a lot easier to understand.
+
+Metaflow also has commands such as `show` and `output-dot` which visualise this structure.
+
+### Checkpointing
+
+It's annoying when your code has gotten halfway through a pipeline only to tail.
+
+Metaflow automatically checkpoints the steps of your flow and lets you `resume` a run after fixing any issues, saving you having to re-run the whole pipeline or maintain your own checkpointing logic (that may be fraught with conflicts between different run parameters).
 
 ## Best practices
 
