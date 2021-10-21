@@ -351,6 +351,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#a-short-investigation-into-artifact-overheads" class="md-nav__link">
+    A short investigation into artifact overheads
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -409,6 +416,21 @@
   
 
     
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        Glossary
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -455,6 +477,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#a-short-investigation-into-artifact-overheads" class="md-nav__link">
+    A short investigation into artifact overheads
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -475,41 +504,76 @@
                 <h1 id="1-metaflow-basics-fetching-auxillary-data-from-the-web">1. Metaflow basics - fetching auxillary data from the web<a class="headerlink" href="#1-metaflow-basics-fetching-auxillary-data-from-the-web" title="Permanent link">&para;</a></h1>
 <p><img alt="⚠" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/26a0.svg" title=":warning:" /> This is not a Metaflow tutorial! It is assumed that you have already looked through the <a href="https://docs.metaflow.org/getting-started/tutorials">official Metaflow tutorials</a> and familiarised yourself with the <a href="https://docs.metaflow.org/">Metaflow docs</a>.</p>
 <h2 id="standard-industrial-taxonomy-sic">Standard Industrial Taxonomy (SIC)<a class="headerlink" href="#standard-industrial-taxonomy-sic" title="Permanent link">&para;</a></h2>
-<p>The first dataset that is fetched and processed is an Excel spreadsheet containing the codes and names of each of the 5 levels of the Standard Industrial Classification (SIC) taxonomy.</p>
+<p>The first dataset that is fetched and processed is an Excel spreadsheet containing the codes and names of each of the 5 levels of the Standard Industrial Classification (SIC) taxonomy.
+Later in the project when we come to analyse whether industry has an effect on the performance of a business' website this will be done using the SIC taxonomy - it's important that we are able to convert the (zero-padded) numeric codes into their description names when interpreting and reporting results.</p>
 <p>The flow code can found in <a href="../../pycco/kuebiko/pipeline/sic/flow.html"><code>kuebiko/pipeline/sic/flow.py</code>*</a> and its utility functions (which are not a focus of this episode) in <a href="../../pycco/kuebiko/pipeline/sic/utils.html"><code>kuebiko/pipeline/sic/utils.py</code></a>.</p>
-<p>Running <code>python kuebiko/pipeline/sic/flow.py show</code> will give us the docstrings and basic structure of the flow.</p>
-<p>Running <code>python kuebiko/pipeline/sic/flow.py run</code> will run the flow.</p>
-<p>Running <code>python kuebiko/pipeline/sic/flow.py dump &lt;run id&gt;/end</code> will dump a summary of the artifacts for a given run ID.</p>
-<p>Because <code>.envrc</code> specifies <code>METAFLOW_DEFAULT_DATASTORE=local</code>, data artifacts are persisted on your local machine (in a <code>.metaflow/</code> folder), not to S3.</p>
-<p>To make the flow store artifacts in S3 then we run <code>python kuebiko/pipeline/sic/flow.py --datastore=s3 run</code>.</p>
+<p>Lets recap a few Metaflow commands:</p>
+<ul>
+<li>
+<p><code>python kuebiko/pipeline/sic/flow.py show</code> will give us the docstrings and basic structure of the flow.</p>
+</li>
+<li>
+<p><code>python kuebiko/pipeline/sic/flow.py run</code> will run the flow.</p>
+</li>
+<li>
+<p><code>python kuebiko/pipeline/sic/flow.py dump &lt;run id&gt;/end</code> will dump a summary of the artifacts for a given run ID.</p>
+</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Metaflow defaults</p>
+<p><code>.envrc</code> specifies:</p>
+<ul>
+<li><code>METAFLOW_DEFAULT_DATASTORE=local</code></li>
+<li><code>METAFLOW_PROFILE=ds-cookiecutter</code></li>
+</ul>
+<p><a href="https://direnv.net/"><code>direnv</code></a> automatically loads these environment variables (after you run <code>direnv allow</code> - a security mechanism to avoid changes to <code>.envrc</code> automatically executing unsafe code).</p>
+<p>The end effect is that Metaflow will use the configuration in <code>~/.metaflowconfig/config_ds-cookiecutter.json</code> that <code>ds-cookiecutter</code> sets up, and then override the default datastore to be local (data artifacts are persisted on your local machine in a <code>.metaflow/</code> folder not to S3).</p>
+</div>
+<ul>
+<li>
+<p><code>python kuebiko/pipeline/sic/flow.py --datastore=s3 run</code> will run the flow storing artifacts in S3 (rather than locally).</p>
+</li>
+<li>
+<p><code>python kuebiko/pipeline/sic/flow.py --datastore=s3 --production run</code> will run the flow storing artifacts in S3 (rather than locally) under a production namespace.</p>
+</li>
+</ul>
 <p><a href="../../pycco/kuebiko/getters/sic.html"><code>kuebiko/getters/sic.py</code>*</a> implements a getter function to load the lookups from our flow.
 Writing a getter may seem to be an uneccessary level of indirection; however it is important to have this level of indirection because <code>getters</code>:</p>
 <ul>
-<li>Allows us to create derived views where Metaflow artifacts may not map 1:1 to getter functions</li>
+<li>Allows us to create derived views of data where Metaflow artifacts may not map 1:1 to getter functions</li>
 <li>Provides a place to go to discover what data is available for <em>analysis</em> along in a logical folder/file structure with clear doc-strings per function<ul>
-<li><strong>It is very important that getters relate to the problem domain!</strong></li>
+<li><strong>It is very important that getters relate to the problem domain</strong>, <br><code>get_csv_table(filename: str) -&gt; DataFrame</code> is not a valid getter, it's a utility function at best!</li>
 </ul>
 </li>
 <li>Enables the possibility of extra data validation before returning to the user</li>
 </ul>
 <h2 id="national-statistics-postcode-lookup-nspl">National Statistics Postcode Lookup (NSPL)<a class="headerlink" href="#national-statistics-postcode-lookup-nspl" title="Permanent link">&para;</a></h2>
-<p>The second dataset that is fetched and processed is the National Statistics Postcode Lookup (NSPL), a lookup from UK postcodes to various statistical geographies.
-In this project we wish to extract the Local Authority District (variably referred to as LAD or LAUA), latitude, and longitude of each postcode.
+<p>The second dataset that is fetched and processed is the National Statistics Postcode Lookup (NSPL), a lookup from UK postcodes to various statistical geographies.</p>
+<p>In this project we wish to extract the Local Authority District (variably referred to as LAD or LAUA), latitude, and longitude of each postcode.
 The Local Authority Districts will enable spatial aggregation of businesses to a level at which official statistics relating to the number of businesses in each SIC code in a given area.
 The latitude and longitude will enable other activities such as plotting.</p>
 <p>The flow code can found in <a href="../../pycco/kuebiko/pipeline/nspl/flow.html"><code>kuebiko/pipeline/nspl/flow.py</code>*</a>, its utility functions (which are not a focus of this episode) in <a href="../../pycco/kuebiko/pipeline/nspl/utils.html"><code>kuebiko/pipeline/nspl/utils.py</code></a>, and its getters in <a href="../../pycco/kuebiko/getters/nspl.html"><code>kuebiko/getters/nspl.py</code>*</a></p>
-<p>Running <code>python kuebiko/pipeline/nspl/flow.py --environment=conda run</code> will run the flow. Note that we need to pass <code>--environment=conda</code> because this flow builds and executes in an isolated conda environment.</p>
+<div class="admonition info inline end">
+<p class="admonition-title">Info</p>
+<p>If a flow uses one of Metaflow's Conda decorators, or <code>--with conda</code> at runtime then it must run with <code>--environment=conda</code>.</p>
+</div>
+<p>Running <code>python kuebiko/pipeline/nspl/flow.py --environment=conda run</code> will run the flow.</p>
 <h2 id="companies-house">Companies House<a class="headerlink" href="#companies-house" title="Permanent link">&para;</a></h2>
-<p>The third dataset that is fetched and processed is the Companies House (UK company registrar) monthly data dump.
-Each registered UK company has a company number. By finding company numbers on websites we can match companies to Companies House obtaining information such as the SIC code they classify their activities as and their registered trading addresses.</p>
+<p>The third dataset that is fetched and processed is the Companies House (UK company registrar) monthly data dump.</p>
+<p>Each registered UK company has a company number. By finding company numbers on websites we can match companies to Companies House obtaining information such as the SIC code they classify their activities as and their registered trading addresses.</p>
 <p>The flow code can found in <a href="../../pycco/kuebiko/pipeline/companies_house/flow.html"><code>kuebiko/pipeline/companies_house/flow.py</code>*</a>, its utility functions (which are not a focus of this episode) in <a href="../../pycco/kuebiko/pipeline/companies_house/utils.html"><code>kuebiko/pipeline/companies_house/utils.py</code></a>, and its getters in <a href="../../pycco/kuebiko/getters/companies_house.html"><code>kuebiko/getters/companies_house.py</code>*</a>
 .</p>
 <p>Running <code>python kuebiko/pipeline/companies_house/flow.py run</code> will run the flow.</p>
-<p>In <a href="../../pycco/kuebiko/pipeline/sic/flow.html"><code>kuebiko/pipeline/sic/flow.py</code>*</a> we talked about the size of metaflow steps and the fact that persisting artifacts with the S3 datastore has some overhead, but how much?
-The Companies House dataset is quite large (several GB of RAM as a Pandas dataframe), so lets use this to explore the slowdown we might see close to the worst case:</p>
+<h2 id="a-short-investigation-into-artifact-overheads">A short investigation into artifact overheads<a class="headerlink" href="#a-short-investigation-into-artifact-overheads" title="Permanent link">&para;</a></h2>
+<p>In <a href="../../pycco/kuebiko/pipeline/sic/flow.html"><code>kuebiko/pipeline/sic/flow.py</code>*</a> we talked about the size of metaflow steps and the fact that persisting artifacts with the S3 datastore has some overhead, but how much?</p>
+<p>The Companies House dataset is quite large (several GB of RAM as a Pandas dataframe), so lets use this to explore the slowdown we might see close to the worst case (also comparing to plain Python <a href="../../pycco/kuebiko/pipeline/companies_house/script.html"><code>kuebiko/pipeline/companies_house/script.py</code>*</a> whilst we're here):</p>
 <ul>
 <li>
 <p><code>time python kuebiko/pipeline/companies_house/flow.py run --max-workers 1</code></p>
+<p>~10 minutes</p>
+</li>
+<li>
+<p><code>time python kuebiko/pipeline/companies_house/script.py</code></p>
 <p>~10 minutes</p>
 </li>
 <li>
@@ -525,7 +589,13 @@ The Companies House dataset is quite large (several GB of RAM as a Pandas datafr
 <p>~19 minutes</p>
 </li>
 </ul>
-<p>A slowdown of 2.5x (5x with more parallelism) is rather large, but do not despair:</p>
+<p>Firstly, we see that Metaflow is the same speed as the plain Python script when
+running on one core. We might expect Metaflow to be a little slower because it
+has to serialise and deserialise artifacts between steps. Metaflow is twice as
+fast when we allow up to 4 steps to execute at once - free parallelism as long
+as we have the RAM to spare!</p>
+<p>Next, comparing the local datastore to the S3 datastore, we see a rather large slowdown of 2.5x (5x with more parallelism)!<br>
+Do not despair:</p>
 <ul>
 <li>This was picked as a particularly bad case</li>
 <li>In reality, you only need to pay this cost once when your feature is complete and you run with <code>--production --datastore=s3</code>. During testing/development you can use <code>--datastore=local</code> (or if you specify <code>METAFLOW_DEFAULT_DATASTORE=local</code> in <code>.envrc</code> then you don't need to explicitly choose this)</li>

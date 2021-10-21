@@ -114,11 +114,9 @@ Here we&rsquo;ve used type aliases to make these easier to interpret.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-5'>#</a>
       </div>
-      <p>Imports used with a step should always go within a step.
+      <p><strong>Imports used with a step should always go within a step.</strong>
 Because metaflow has the ability to abstract infrastructure then
-different steps may run on different machines with different environments.
-<code>from kuebiko.pipeline.sic.utils ...</code> wouldn&rsquo;t work - <code>kuebiko</code>
-isn&rsquo;t installed/packaged in the new conda environment.</p>
+different steps may run on different machines with different environments.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">get</span><span class="p">,</span> <span class="n">excel_to_df</span></pre></div>
@@ -130,9 +128,11 @@ isn&rsquo;t installed/packaged in the new conda environment.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-6'>#</a>
       </div>
-      <p>Capturing important values, such as the URL data was fetched from,
-as data artifacts helps debugging previous runs and can monitor important
-changes.</p>
+      <p><strong>Capture important values as data artifacts</strong>, such as the URL data
+was fetched from. This helps debugging previous runs and can monitor
+important changes.<br>
+Though be wary of doing this uneccessarily for large values due to
+the overhead of persisting artifacts.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">URL</span></pre></div>
@@ -164,7 +164,7 @@ of best judgement.</p>
         <a class='octothorpe' href='#section-8'>#</a>
       </div>
       <p>What operations should belong to the same step and when does it make
-sense to split a large step into multiple separate steps?
+sense to split a large step into multiple separate steps?<br>
 Artifacts are persisted when a step finishes executing. After artifacts
 have been persisted successfully, they become available for inspection,
 e.g. <code>metaflow.Run("Sic2007Structure").start.task.data.url</code>.
@@ -177,8 +177,8 @@ means you won&rsquo;t lose much work if failures happen; however persisting
 artifacts (particularly using the S3 datastore) and launching tasks
 (particularly using AWS batch) has some overhead so if your steps are
 too small, the overhead starts dominating the total execution time.
-On balance it is good to have steps that logically map to the domain/problem
-so that it is easy to get a high-level understanding of the flow. If
+<strong>On balance it is good to have steps that logically map to the domain/problem
+so that it is easy to get a high-level understanding of the flow.</strong> If
 you notice a large amount of overhead or your flow is hard to debug then
 you can split or merge existing steps accordingly.</p>
     </div>
@@ -190,13 +190,7 @@ you can split or merge existing steps accordingly.</p>
 <span class="sd">        Make implicit entries explicit at row-level (fill), normalise SIC</span>
 <span class="sd">        codes, and add extra codes specific to Companies House.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">companies_house_extras</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">normalise_codes</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raw_data</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">normalise_codes</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">companies_house_extras</span><span class="p">())</span>
-        <span class="p">)</span></pre></div>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">companies_house_extras</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">normalise_codes</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -208,16 +202,23 @@ you can split or merge existing steps accordingly.</p>
       <p>One of the big downsides of passing around dataframes is that it&rsquo;s
 easy to lose track of the shape of the data as it passes through
 various transformation functions, especially if you didn&rsquo;t even
-write the code in the first place!
-Giving functions informative names and docstrings and obeying the
-Single Responsibility Principle can really help the understandability
-of code. What about these functions, are there names and docstrings
-informative enough? What would you change?
+write the code in the first place!<br>
+<strong>Give functions informative names and docstrings and obey the
+Single Responsibility Principle</strong> to really help the understandability
+of code.<br>
+What about these functions, are there names and docstrings
+informative enough? What would you change?<br>
 In a later episode we will see how unit tests can also increase the
 readability and transparency of these transformation functions.</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raw_data</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">normalise_codes</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">companies_house_extras</span><span class="p">())</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -241,8 +242,8 @@ readability and transparency of these transformation functions.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-11'>#</a>
       </div>
-      <p>Where possible avoid saving dataframes as artifacts,
-favouring standard Python data-structures instead.
+      <p>Where possible <strong>avoid saving dataframes as artifacts</strong>,
+favouring standard Python data-structures instead.<br>
 Python data-structures do not impose the Pandas dependency on the
 downstream consumer of the data who may be working in an environment
 where Pandas isn&rsquo;t available (e.g. AWS lambda) or may have a

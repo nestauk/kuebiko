@@ -69,8 +69,8 @@ create a separate Conda environment and run our flow inside that.
 This minimises the time to install and chance of dependency conflicts
 in the environment that everyone must install, not just the
 machine/person running this pipeline.
-In reality, it&rsquo;s best to stick to using your project&rsquo;s main environment
-and only use Metaflow&rsquo;s conda decorators when you definitely need them.</p>
+In reality, it&rsquo;s best to <strong>stick to using your project&rsquo;s main environment
+and only use Metaflow&rsquo;s conda decorators when you definitely need them</strong>.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>    <span class="n">libraries</span><span class="o">=</span><span class="p">{</span>
@@ -99,7 +99,7 @@ and only use Metaflow&rsquo;s conda decorators when you definitely need them.</p
       <div class='octowrap'>
         <a class='octothorpe' href='#section-4'>#</a>
       </div>
-      <p>A flows docstring is a great place to document (or refer to)
+      <p>A flows docstring is one place to document (or refer to)
 shortcomings in the data.</p>
     </div>
     <div class='code'>
@@ -151,14 +151,16 @@ sensible default.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-6'>#</a>
       </div>
-      <p>If your flow takes more than a minute or two to run then you should
-always add a parameter <code>test-mode</code> which will run your flow in test
-mode, e.g. fetch/run a subset of the data.
+      <p><strong>If your flow takes more than a minute or two to run then you should
+always add a parameter <code>test-mode</code></strong> which will run your flow in test
+mode, e.g. fetch/run a subset of the data.<br>
 This facilitates both efficient code review and automated testing.
-We recommend that by default <code>test-mode</code> is either:
-- The logical not of <code>current.is_production</code>
-  (so that this is evaluated at the right time, it must be a lambda as below)
-- <code>True</code></p>
+We recommend that by default <code>test-mode</code> is either:</p>
+<ul>
+<li>The logical not of <code>current.is_production</code>
+  (so that this is evaluated at the right time, it must be a callable)</li>
+<li><code>True</code></li>
+</ul>
     </div>
     <div class='code'>
       <div class="highlight"><pre>    <span class="n">test_mode</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
@@ -221,8 +223,8 @@ We recommend that by default <code>test-mode</code> is either:
       <div class='octowrap'>
         <a class='octothorpe' href='#section-8'>#</a>
       </div>
-      <p>If a flow is run with <code>--production</code> (<code>current.is_production</code> is
-<code>True</code>) then it should NOT run in test mode&hellip;</p>
+      <p><strong>If a flow is run with <code>--production</code> (<code>current.is_production</code> is
+<code>True</code>) then it should NOT run in test mode.</strong></p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">:</span>
@@ -238,7 +240,7 @@ We recommend that by default <code>test-mode</code> is either:
       <div class='octowrap'>
         <a class='octothorpe' href='#section-9'>#</a>
       </div>
-      <p>Downloading a large zip each time we iterate is inefficient.
+      <p>Downloading a large zip each time we iterate is inefficient.<br>
 With other expensive tasks we can split them into different
 metaflow steps and <code>resume</code> part-way through our flow; however
 if we download a zip in one step and process it in another then
@@ -261,8 +263,7 @@ the file is re-downloaded rather than risking an invalid cache/local copy.</p>
 
             <span class="c1"># LAUA lookup from codes to names</span>
             <span class="n">laua_names_tmp</span> <span class="o">=</span> <span class="n">read_laua_names</span><span class="p">(</span><span class="n">zipfile</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">laua_year</span> <span class="o">=</span> <span class="n">extract_laua_year</span><span class="p">(</span><span class="n">laua_names_tmp</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">laua_names</span> <span class="o">=</span> <span class="n">laua_names_tmp</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></pre></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">laua_year</span> <span class="o">=</span> <span class="n">extract_laua_year</span><span class="p">(</span><span class="n">laua_names_tmp</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -275,7 +276,9 @@ the file is re-downloaded rather than risking an invalid cache/local copy.</p>
 the single responsibility principle.</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_quality</span><span class="p">)</span></pre></div>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">laua_names</span> <span class="o">=</span> <span class="n">laua_names_tmp</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_quality</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -305,27 +308,15 @@ We will see some potential better approaches to data quality checks
 in a later episode.</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="c1"># TODO refactor into DQ funs</span>
-
-        <span class="c1"># Null checks</span>
+      <div class="highlight"><pre>        <span class="c1"># Null checks</span>
         <span class="n">has_nulls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">has_nulls</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;Nulls detected&quot;</span><span class="p">)</span>
 
         <span class="c1"># Postcode validity</span>
-        <span class="c1"># Choose very simple postcode verification as NSPL is a fairly</span></pre></div>
-    </div>
-  </div>
-  <div class='clearall'></div>
-  <div class='section' id='section-13'>
-    <div class='docs'>
-      <div class='octowrap'>
-        <a class='octothorpe' href='#section-13'>#</a>
-      </div>
-      <p>authoritative source that may update faster than a precise regex</p>
-    </div>
-    <div class='code'>
-      <div class="highlight"><pre>        <span class="n">POSTCODE_REGEX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^([A-Z]{1,2}[A-Z\d]{0,2}? ?\d[A-Z]</span><span class="si">{2}</span><span class="s2">)$&quot;</span>
+        <span class="c1"># Choose very simple postcode verification as NSPL is a fairly</span>
+        <span class="c1"># authoritative source that may update faster than a precise regex</span>
+        <span class="n">POSTCODE_REGEX</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^([A-Z]{1,2}[A-Z\d]{0,2}? ?\d[A-Z]</span><span class="si">{2}</span><span class="s2">)$&quot;</span>
         <span class="n">valid_pcds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">POSTCODE_REGEX</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_pcds</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
@@ -348,10 +339,10 @@ in a later episode.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-14'>
+  <div class='section' id='section-13'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-14'>#</a>
+        <a class='octothorpe' href='#section-13'>#</a>
       </div>
       
     </div>
@@ -361,10 +352,10 @@ in a later episode.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-15'>
+  <div class='section' id='section-14'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-15'>#</a>
+        <a class='octothorpe' href='#section-14'>#</a>
       </div>
       <p>Individual lookups reduce the amount of data each getter needs to
 download for the price of slightly more serialisation overhead and
@@ -372,8 +363,19 @@ storage when the flow is originally run</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">pcd_laua</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="p">[</span><span class="s2">&quot;laua&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pcd_latlong</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="p">[[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span>  <span class="c1"># Don&#39;t expose the pandas dataframe as a final artifact</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pcd_latlong</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="p">[[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Don&rsquo;t expose the pandas dataframe as a final artifact</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

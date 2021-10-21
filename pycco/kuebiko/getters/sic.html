@@ -40,18 +40,13 @@
       <div class='octowrap'>
         <a class='octothorpe' href='#section-1'>#</a>
       </div>
-      <p>Examining past runs involves making network request and database queries,
+      <p>Examining past runs involves making network requests and database queries,
 caching means that we only need to pay this cost once.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre><span class="nd">@lru_cache</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">get_run</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Last successful run executed with `--production`.&quot;&quot;&quot;</span>
-    <span class="n">runs</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">(</span><span class="s2">&quot;Sic2007Structure&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="s2">&quot;project_branch:prod&quot;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span> <span class="n">runs</span><span class="p">))</span>
-    <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">MetaflowNotFound</span><span class="p">(</span><span class="s2">&quot;Matching run not found&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span></pre></div>
+    <span class="sd">&quot;&quot;&quot;Last successful run executed with `--production`.&quot;&quot;&quot;</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -59,6 +54,24 @@ caching means that we only need to pay this cost once.</p>
     <div class='docs'>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p><code>project_branch:prod</code> is the tag corresponding to running a flow with
+the <code>--production</code> flag. Without <code>--production</code> the equivalent tag
+relates to your username, e.g. <code>project_branch:user.alex</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">runs</span> <span class="o">=</span> <span class="n">Flow</span><span class="p">(</span><span class="s2">&quot;Sic2007Structure&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="s2">&quot;project_branch:prod&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span> <span class="n">runs</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MetaflowNotFound</span><span class="p">(</span><span class="s2">&quot;Matching run not found&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
       </div>
       <p>Returning the latest successful run,
 e.g. <code>Flow("Sic2007Structure").latest_successful_run</code>,
@@ -71,7 +84,8 @@ For this reason, we recommend:</p>
 <ul>
 <li>Using <a href="https://docs.metaflow.org/
 going-to-production-with-metaflow/
-coordinating-larger-metaflow-projects#the-project-decorator"><code>@project</code></a></li>
+coordinating-larger-metaflow-projects#the-project-decorator"><code>@project</code></a>
+  on a Flow</li>
 <li>Have <code>kuebiko/__init__.py</code> choose the project&rsquo;s namespace -
  <code>metaflow.namespace("project:kuebiko")</code> in this case</li>
 <li>Write getters that fetch &lsquo;production&rsquo; artifacts but are extensible</li>

@@ -83,8 +83,8 @@
       <p>One could implement many getters in a PR along with the metaflow pipeline -
 e.g. getters returning full dataframes for the organisation, address, and
 sector tables; however, unless you know the exact interface required then it
-is better to keep things minimal to avoid having to communicate breaking
-changes when needs become clearer later on.
+is better to keep things minimal to avoid having to navigate breaking
+changes (on the people and the code side) when needs become clearer later on.
 In this case, we&rsquo;ve implemented two simple getters we&rsquo;re pretty sure are needed.</p>
     </div>
     <div class='code'>
@@ -121,7 +121,7 @@ In this case, we&rsquo;ve implemented two simple getters we&rsquo;re pretty sure
       </div>
       <p>Look ma, I turned three lines into one!
 This change isn&rsquo;t <em>too</em> complex but it&rsquo;s likely less readable to most
-which is always something to bear in mind when collaborating.</p>
+which is always something to bear in mind when trying to be lazy or clever.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>    <span class="k">return</span> <span class="p">(</span><span class="n">run</span> <span class="ow">or</span> <span class="n">get_run</span><span class="p">())</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sectors</span><span class="p">[</span><span class="s2">&quot;SIC4_code&quot;</span><span class="p">]</span>
