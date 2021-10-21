@@ -46,8 +46,8 @@ def company_postcode_lookup(
 ## One could implement many getters in a PR along with the metaflow pipeline -
 ## e.g. getters returning full dataframes for the organisation, address, and
 ## sector tables; however, unless you know the exact interface required then it
-## is better to keep things minimal to avoid having to communicate breaking
-## changes when needs become clearer later on.
+## is better to keep things minimal to avoid having to navigate breaking
+## changes (on the people and the code side) when needs become clearer later on.
 ## In this case, we've implemented two simple getters we're pretty sure are needed.
 
 
@@ -64,5 +64,5 @@ def company_sic4_lookup(
     """
     ## Look ma, I turned three lines into one!
     ## This change isn't _too_ complex but it's likely less readable to most
-    ## which is always something to bear in mind when collaborating.
+    ## which is always something to bear in mind when trying to be lazy or clever.
     return (run or get_run()).data.sectors["SIC4_code"]
