@@ -66,3 +66,4 @@ nav:
       - "01 - Metaflow basics": episodes/episode_01.md
   - Condensed guides:
       - "Metaflow": guides/metaflow.md
+  - Glossary: glossary.md
