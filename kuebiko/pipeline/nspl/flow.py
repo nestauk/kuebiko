@@ -30,8 +30,8 @@ laua_code = str
     ## This minimises the time to install and chance of dependency conflicts
     ## in the environment that everyone must install, not just the
     ## machine/person running this pipeline.
-    ## In reality, it's best to stick to using your project's main environment
-    ## and only use Metaflow's conda decorators when you definitely need them.
+    ## In reality, it's best to **stick to using your project's main environment
+    ## and only use Metaflow's conda decorators when you definitely need them**.
     libraries={
         "pandas": "1.1.0",
         "selenium": "3.141.0",
@@ -39,7 +39,7 @@ laua_code = str
     }
 )
 @project(name="kuebiko")
-## A flows docstring is a great place to document (or refer to)
+## A flows docstring is one place to document (or refer to)
 ## shortcomings in the data.
 class NsplLookup(FlowSpec):
     """Lookups from postcode to Local Authority Districts and lat-long.
@@ -73,13 +73,14 @@ class NsplLookup(FlowSpec):
         default="national-statistics-postcode-lookup-august-2021",
     )
 
-    ## If your flow takes more than a minute or two to run then you should
-    ## always add a parameter `test-mode` which will run your flow in test
-    ## mode, e.g. fetch/run a subset of the data.
+    ## **If your flow takes more than a minute or two to run then you should
+    ## always add a parameter `test-mode`** which will run your flow in test
+    ## mode, e.g. fetch/run a subset of the data.<br>
     ## This facilitates both efficient code review and automated testing.
     ## We recommend that by default `test-mode` is either:
+    ##
     ## - The logical not of `current.is_production`
-    ##   (so that this is evaluated at the right time, it must be a lambda as below)
+    ##   (so that this is evaluated at the right time, it must be a callable)
     ## - `True`
     test_mode = Parameter(
         "test-mode",
@@ -124,15 +125,15 @@ class NsplLookup(FlowSpec):
             read_laua_names,
         )
 
-        ## If a flow is run with `--production` (`current.is_production` is
-        ## `True`) then it should NOT run in test mode...
+        ## **If a flow is run with `--production` (`current.is_production` is
+        ## `True`) then it should NOT run in test mode.**
         if self.test_mode and not current.is_production:
             nrows = 1_000
             logging.warning(f"TEST MODE: Constraining to first {nrows} rows!")
         else:
             nrows = None
 
-        ## Downloading a large zip each time we iterate is inefficient.
+        ## Downloading a large zip each time we iterate is inefficient.<br>
         ## With other expensive tasks we can split them into different
         ## metaflow steps and `resume` part-way through our flow; however
         ## if we download a zip in one step and process it in another then
@@ -154,9 +155,9 @@ class NsplLookup(FlowSpec):
             # LAUA lookup from codes to names
             laua_names_tmp = read_laua_names(zipfile)
             self.laua_year = extract_laua_year(laua_names_tmp)
-            self.laua_names = laua_names_tmp.to_dict()
             ## We could have extracted year in `read_laua_names` but we keep to
             ## the single responsibility principle.
+            self.laua_names = laua_names_tmp.to_dict()
 
         self.next(self.data_quality)
 
@@ -170,8 +171,6 @@ class NsplLookup(FlowSpec):
         ## We will see some potential better approaches to data quality checks
         ## in a later episode.
 
-        # TODO refactor into DQ funs
-
         # Null checks
         has_nulls = self.nspl_data.isna().sum().sum() > 0
         if has_nulls:
@@ -179,7 +178,7 @@ class NsplLookup(FlowSpec):
 
         # Postcode validity
         # Choose very simple postcode verification as NSPL is a fairly
-        ## authoritative source that may update faster than a precise regex
+        # authoritative source that may update faster than a precise regex
         POSTCODE_REGEX = r"^([A-Z]{1,2}[A-Z\d]{0,2}? ?\d[A-Z]{2})$"
         valid_pcds = self.nspl_data.index.str.match(POSTCODE_REGEX)
         if not valid_pcds.all():
@@ -208,7 +207,8 @@ class NsplLookup(FlowSpec):
         ## storage when the flow is originally run
         self.pcd_laua = self.nspl_data["laua"].to_dict()
         self.pcd_latlong = self.nspl_data[["lat", "long"]].to_dict(orient="index")
-        del self.nspl_data  # Don't expose the pandas dataframe as a final artifact
+        ## Don't expose the pandas dataframe as a final artifact
+        del self.nspl_data
 
 
 if __name__ == "__main__":
