@@ -70,7 +70,7 @@ class CompaniesHouseDump(FlowSpec):
     @step
     def start(self):
         """Parse parameters into URL's containing data chunks."""
-        ## It is important to always have a docstring for `start` and `end`
+        ## It is important to **always have a docstring for `start` and `end`**
         ## because their name cannot convey any information about what
         ## the step does when looking at the DAG structure (without the code),
         ## e.g. when using the `show` or `output-dot` commands.
@@ -85,6 +85,7 @@ class CompaniesHouseDump(FlowSpec):
             self.urls = self.urls[:1]
             logging.warning("TEST MODE: Constraining to first part of data!")
 
+        ## This step forks for each URL
         self.next(self.get_data_chunk, foreach="urls")
 
     @step
@@ -95,6 +96,8 @@ class CompaniesHouseDump(FlowSpec):
         from utils import read_from_url
 
         self.raw = read_from_url(self.input)
+
+        ## Each fork (corresponding to one URL chunk), forks a further three times
         self.next(self.process_organisation, self.process_address, self.process_sectors)
 
     @step
@@ -118,13 +121,15 @@ class CompaniesHouseDump(FlowSpec):
         self.sectors = process_sectors(self.raw)
         self.next(self.join_branch)
 
+    ## Forks must be joined in reverse order
     @step
     def join_branch(self, inputs):
         """Merge artifacts for a single data chunk."""
         self.merge_artifacts(inputs)
         self.next(self.join_foreach)
 
-    ## No way to separate this out into multiple extra steps to minimise RAM
+    ## This step involves loading several large data artifacts; however there
+    ## is no way to separate this out into multiple extra steps to minimise RAM
     ## because a join step must resolve all artifacts. The only solution is to
     ## have a big enough machine.
     @step
