@@ -66,4 +66,4 @@ def level_lookup(level: int, run: Optional[Run] = None) -> Dict[code, code_name]
     if level not in range(1, len(LEVELS) + 1):
         raise ValueError(f"Level: {level} not valid.")
 
-    return getattr(run.data, LEVELS[level - 1])
+    return getattr(run.data, f"{LEVELS[level - 1]}_lookup")
