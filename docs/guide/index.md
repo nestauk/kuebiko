@@ -4,6 +4,14 @@
 
 A "full" (see [Corners cut](#corners-cut)) example [`ds-cookiecutter`](http://nestauk.github.io/ds-cookiecutter/) project broken down into episodes, with annotations/narrative for each episode focusing on a different aspect. In addition, there are a set of reference guides consolidating key concepts and pointing to further resources.
 
+!!! warning "Not from around these parts? A disclaimer..."
+
+    This is an **internal (but open) project** to develop and refine best practices for _a subset_ of Nesta's work delivering data science projects.
+
+    It is not a guide to production data science and the **recommended practices in this guide may be wholly unsuitable for you/your company** because you may be delivering completely different types of projects under completely different constraints.
+
+    Furthermore, these docs are deployed when a new episode is ready for review therefore **content is likely to change significantly**! To get an indication of what content is stable, check out which [episodes have closed issues](https://github.com/nestauk/kuebiko/issues?q=is%3Aclosed+label%3Aepisode+sort%3Acreated-asc+).
+
 ### Project problem statement
 
 You have been given a big list (>100,000) of URLs corresponding to the business websites of UK companies.
