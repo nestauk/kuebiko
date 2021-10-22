@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from metaflow import namespace
+
+namespace("project:kuebiko")
 
 
 def get_yaml_config(file_path: Path) -> Optional[dict]:

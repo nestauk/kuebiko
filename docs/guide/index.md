@@ -29,7 +29,7 @@ Some specific questions they have are:
 Below is a list of provisional episodes. See [issues labeled `episode`](https://github.com/nestauk/kuebiko/issues?q=is%3Aopen+label%3Aepisode+sort%3Acreated-asc) for more information and more timely updates.
 
 -   [x] 0. Setup
--   [ ] 1. Metaflow basics - fetching auxiliary data from the web
+-   [x] 1. Metaflow basics - fetching auxiliary data from the web
 -   [ ] 2. Getting data from SQL - fetching NOMIS auxiliary data
 -   [ ] 3. Critical coding - web-scraping utilities
 -   [ ] 4. Metaflow on AWS batch - scaling a web-scraper
@@ -76,4 +76,6 @@ This is a MVP of a data science project following the `ds-cookiecutter` workflow
 
 -   To avoid covering too much at once, early episodes are missing important things such as tests and data quality and data validation. These are covered a few episodes in and are retrospectively added at that point; **however** in a real project tests should always be written at the same time as the code they test (or even before if you are a proponent of test driven development)!
 -   When an episode gets opened for review then the code is only in a state/quality that any other PR might be at when a review is requested. I.e. there will be mistakes/shortcomings so it's up to DAP as a community to help improve things.
+    There are a few deliberate "mistakes" throughout, try and spot them
+    and raise it in review.
 -   The [`ds-cookiecutter` template](https://github.com/nestauk/ds-cookiecutter/pull/92) this is based on has not yet been merged (awaiting further reviews)
