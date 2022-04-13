@@ -4,7 +4,7 @@ docs/site
 docs/pycco.css
 docs/guide/pycco
 
-
+.recipes/
 .cookiecutter/state/
 
 *.lock
