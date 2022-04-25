@@ -94,7 +94,12 @@ class Sic2007Structure(FlowSpec):
         Make implicit entries explicit at row-level (fill), normalise SIC
         codes, and add extra codes specific to Companies House.
         """
-        from utils import companies_house_extras, fill, normalise_codes
+        from utils import (
+            companies_house_extras,
+            EXPECTED_COLUMNS,
+            fill,
+            normalise_codes,
+        )
 
         ## One of the big downsides of passing around dataframes is that it's
         ## easy to lose track of the shape of the data as it passes through
@@ -113,6 +118,7 @@ class Sic2007Structure(FlowSpec):
             .append(companies_house_extras())
         )
 
+        assert self._data.columns.tolist() == EXPECTED_COLUMNS
         self.next(self.end)
 
     @step

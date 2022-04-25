@@ -4,6 +4,18 @@ import requests
 from toolz import interleave
 
 LEVELS = ["section", "division", "group", "class", "subclass"]
+EXPECTED_COLUMNS = [
+    "section",
+    "section_name",
+    "division",
+    "division_name",
+    "group",
+    "group_name",
+    "class",
+    "class_name",
+    "subclass",
+    "subclass_name",
+]
 
 
 def get(url: str) -> bytes:
@@ -28,12 +40,50 @@ def excel_to_df(content: bytes) -> pd.DataFrame:
 
 
 def fill(df: pd.DataFrame) -> pd.DataFrame:
-    """Fill missing information in spreadsheet."""
+    """Fill missing information in spreadsheet.
+
+    Go from:
+
+    ```
+    [
+        ["A", "Agri", nan, nan, nan, nan, nan, nan, nan, nan],
+        [nan, nan, "01", "Crop", nan, nan, nan, nan, nan, nan],
+        [nan, nan, nan, nan, "01.1", "Grow", nan, nan, nan, nan],
+        [nan, nan, nan, nan, nan, nan, "01.11", "Grow", nan, nan],
+        [nan, nan, nan, nan, nan, nan, nan, nan, "01.11/xx", "Extra"],
+        [nan, nan, nan, nan, nan, nan, "01.12", "Grow", nan, nan],
+        [nan, nan, nan, nan, "01.2", "Grow", nan, nan, nan, nan],
+        [nan, nan, nan, nan, nan, nan, "01.21", "Grow", nan, nan],
+        [nan, nan, "02", "Forest", nan, nan, nan, nan, nan, nan],
+        [nan, nan, nan, nan, "02.1", "Silvi", nan, nan, nan, nan],
+        [nan, nan, nan, nan, nan, nan, "02.10", "Silvi", nan, nan],
+        ["B", "Mini", nan, nan, nan, nan, nan, nan, nan, nan],
+        [nan, nan, "05", "Mini", nan, nan, nan, nan, nan, nan],
+        [nan, nan, nan, NOTE, nan, nan, nan, nan, nan, nan],
+        [nan, nan, nan, nan, "05.1", "Mini", nan, nan, nan, nan],
+        [nan, nan, nan, nan, nan, nan, "05.10", "Mini", nan, nan],
+    ]
+    ```
+
+    To:
+
+    ```
+    [
+        ["A", "Agri", "01", "Crop", "01.1", "Grow", "01.11", "Grow", "01.11/xx", "Extra"],
+        ["A", "Agri", "01", "Crop", "01.1", "Grow", "01.12", "Grow", "01.12/0", "Grow"],
+        ["A", "Agri", "01", "Crop", "01.2", "Grow", "01.21", "Grow", "01.21/0", "Grow"],
+        ["A", "Agri", "02", "Forest", "02.1", "Silvi", "02.10", "Silvi", "02.10/0", "Silvi"],
+        ["B", "Mini", "05", "Mini", "05.1", "Mini", "05.10", "Mini", "05.10/0", "Mini"],
+    ]
+    ```
+    """  # noqa: B950
     return (
-        df.pipe(_generic_fill, "section")
+        df.pipe(_drop_notes)
+        .pipe(_generic_fill, "section")
         .pipe(_generic_fill, "division")
         .pipe(_generic_fill, "group")
-        .pipe(_subclass_fill)
+        .pipe(_class_subclass_fill)[EXPECTED_COLUMNS]
+        .reset_index(drop=True)
     )
 
 
@@ -59,8 +109,12 @@ def normalise_codes(df):
     return df
 
 
-def _subclass_fill(df: pd.DataFrame) -> pd.DataFrame:
-    """Resolve."""
+def _class_subclass_fill(df: pd.DataFrame) -> pd.DataFrame:
+    """Fill class and subclass.
+
+    More nuanced because subclasses may not exist, therefore have to be
+    resolved at the same time of class and possible inferred from them.
+    """
     # Forward fill classes
     df.loc[:, ("class", "class_name")] = df.loc[:, ("class", "class_name")].ffill()
 
@@ -80,13 +134,25 @@ def _subclass_fill(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates()  # Drops dups we induced with bfill
 
 
+def _drop_notes(df):
+    """Drop rows that only have either code or name - they correspond to notes."""
+    return df.loc[df.notna().sum(1) != 1]
+
+
 def _generic_fill(df: pd.DataFrame, col: str) -> pd.DataFrame:
     """Ffill columns relating to `col`, dropping rows that were originally not NaN."""
     cols = [col, f"{col}_name"]
-    subdf = (
-        df[cols].copy()
-        # Drop rows that only have either code or name - they correspond to notes
-        .loc[lambda x: x[cols].isna().sum(1) != 1]
+    subdf = df[cols].copy()
+
+    # Indexes of rows that were originally not NaN (just labels to be propagated)
+    label_idx = subdf.notna().sum(1).astype(bool)
+
+    return (
+        subdf
+        # Forward fill
+        .ffill()
+        # Drop rows we don't need
+        .loc[~label_idx]
+        # Join back to rest of columns
+        .join(df.drop(cols, 1))
     )
-    label_idx = subdf[cols].notna().sum(1).astype(bool)
-    return subdf.ffill().loc[~label_idx].join(df.drop(cols, 1))

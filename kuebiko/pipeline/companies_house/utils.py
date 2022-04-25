@@ -1,4 +1,6 @@
 """Companies House data processing."""
+from zipfile import ZipFile
+
 import pandas as pd
 
 
@@ -26,12 +28,17 @@ COLUMN_MAPPINGS = {
 }
 
 
-def read_from_url(url: str) -> pd.DataFrame:
+def read_companies_house_chunk(zipfile: ZipFile) -> pd.DataFrame:
     """Read Companies House zipped CSV data-dump from url."""
-    return (
-        pd.read_csv(url, usecols=COLUMN_MAPPINGS.keys(), compression="zip")
-        .rename(columns=COLUMN_MAPPINGS)
-        .drop_duplicates()
+    n_files = len(zipfile.namelist())
+    if n_files != 1:
+        raise ValueError(
+            f"Expected zipfile {zipfile} to contain 1 file, found {n_files}"
+        )
+
+    zip_path = zipfile.namelist()[0]
+    return pd.read_csv(zipfile.open(zip_path), usecols=COLUMN_MAPPINGS.keys()).rename(
+        columns=COLUMN_MAPPINGS
     )
 
 

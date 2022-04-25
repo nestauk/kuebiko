@@ -1,7 +1,19 @@
 from datetime import datetime, timedelta
+from io import BytesIO
 from typing import Any, Dict
+from zipfile import ZipFile
 
-from metaflow import current, FlowSpec, Parameter, project, step
+import requests
+from metaflow import (
+    card,
+    conda_base,
+    current,
+    FlowSpec,
+    Parameter,
+    project,
+    resources,
+    step,
+)
 
 DATA_DUMP_URL_FORMAT = (
     "https://download.companieshouse.gov.uk/"
@@ -14,6 +26,20 @@ field_name = str
 company_number = str
 
 
+def download_zip(url: str) -> ZipFile:  # TODO: refactor
+    """Download a URL and load into `ZipFile`."""
+    response = requests.get(url)
+    response.raise_for_status()
+    return ZipFile(BytesIO(response.content), "r")
+
+
+@conda_base(
+    libraries={
+        "pandas": "1.1.5",
+        "pandas-profiling": "3.1.0",
+        "requests-cache": "0.4.13",
+    }
+)
 @project(name="kuebiko")
 class CompaniesHouseDump(FlowSpec):
     """Companies House monthly data dump.
@@ -93,9 +119,17 @@ class CompaniesHouseDump(FlowSpec):
         ## Due to the atomic nature of the following few steps in this flow,
         ## docstrings would just repeat either/both of the step name or the
         ## docstring of the single functions they tend to call.
-        from utils import read_from_url
+        import requests_cache
 
-        self.raw = read_from_url(self.input)
+        from utils import read_companies_house_chunk
+
+        if not current.is_production:
+            requests_cache.install_cache("ch_zip_cache")
+
+        ## Use of `requests_cache` means we need to download the zipfile rather
+        ## than giving a URL directly with `pandas.read_csv(..., compression="zip")`
+        with download_zip(self.input) as zipfile:
+            self.raw = read_companies_house_chunk(zipfile).drop_duplicates()
 
         ## Each fork (corresponding to one URL chunk), forks a further three times
         self.next(self.process_organisation, self.process_address, self.process_sectors)
@@ -132,12 +166,15 @@ class CompaniesHouseDump(FlowSpec):
     ## is no way to separate this out into multiple extra steps to minimise RAM
     ## because a join step must resolve all artifacts. The only solution is to
     ## have a big enough machine.
+    @card(type="html", options={"attribute": "html_sectors"}, id="Sectors")
+    @card(type="html", options={"attribute": "html_organisations"}, id="Organisations")
+    @card(type="html", options={"attribute": "html_addresses"}, id="Addresses")
+    @resources(memory=32_000)
     @step
     def join_foreach(self, inputs):
         """Merge artifacts of different data chunks together."""
-        import logging
-
         from pandas import concat
+        from pandas_profiling import ProfileReport
 
         self.organisations = concat(input.organisations for input in inputs)
         self.addresses = concat(input.addresses for input in inputs)
@@ -145,26 +182,17 @@ class CompaniesHouseDump(FlowSpec):
 
         self.merge_artifacts(inputs, exclude=["raw"])
 
-        ## We can save metadata such as dataframe lengths as an artifact, which
-        ## can come in useful for debugging/monitoring/experiment tracking
-        self.metadata = {
-            "lengths": {
-                "organisations": self.organisations.shape,
-                "addresses": self.addresses.shape,
-                "sectors": self.sectors.shape,
-                ## Whether DRY is a good idea is subjective here, is the
-                ## decreased readability of the following worth it?
-                ## ```python
-                ## self.metadata = {
-                ##     "lengths": {
-                ##         attr: getattr(self, attr).shape
-                ##         for attr in ["organisations", "addresses", "sectors"]
-                ##     }
-                ## }
-                ## ```
-            }
+        profile_options = {
+            "progress_bar": False,
+            "html": {"minify_html": True, "navbar_show": False},
+            "correlations": None,
+            "interactions": None,
         }
-        logging.info(self.metadata)
+        self.html_sectors = ProfileReport(self.sectors, **profile_options).to_html()
+        self.html_organisations = ProfileReport(
+            self.organisations, **profile_options
+        ).to_html()
+        self.html_addresses = ProfileReport(self.addresses, **profile_options).to_html()
 
         ## It may be more logical to put this conversion from one data type to
         ## another in the `end` step; however because the data artifacts are

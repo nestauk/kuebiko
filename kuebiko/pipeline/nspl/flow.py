@@ -1,6 +1,7 @@
 from typing import Dict, Literal
 
 from metaflow import (
+    card,
     conda_base,
     current,
     FlowSpec,
@@ -33,7 +34,8 @@ laua_code = str
     ## In reality, it's best to **stick to using your project's main environment
     ## and only use Metaflow's conda decorators when you definitely need them**.
     libraries={
-        "pandas": "1.1.0",
+        "pandas": "1.1.5",
+        "pandas-profiling": "3.1.0",
         "selenium": "3.141.0",
         "requests-cache": "0.4.13",
     }
@@ -159,17 +161,15 @@ class NsplLookup(FlowSpec):
             ## the single responsibility principle.
             self.laua_names = laua_names_tmp.to_dict()
 
-        self.next(self.data_quality)
+        self.next(self.data_quality_tests)
 
     @step
-    def data_quality(self):
+    def data_quality_tests(self):
         """Data quality checks."""
         from utils import LOOSE_UK_BOUNDS
 
         ## It is always important to check data-quality, both during EDA but
         ## also during each workflow run.
-        ## We will see some potential better approaches to data quality checks
-        ## in a later episode.
 
         # Null checks
         has_nulls = self.nspl_data.isna().sum().sum() > 0
@@ -198,6 +198,23 @@ class NsplLookup(FlowSpec):
         assert self.nspl_data.lat.between(*LOOSE_UK_BOUNDS["lat"]).all()
         assert self.nspl_data.long.between(*LOOSE_UK_BOUNDS["long"]).all()
 
+        self.next(self.data_quality_report)
+
+    @card(type="html")  # TODO: document
+    @step
+    def data_quality_report(self):
+        from pandas_profiling import ProfileReport
+
+        profile = ProfileReport(
+            self.nspl_data,
+            title="NSPL lookup profile report",
+            progress_bar=False,
+            html={"minify_html": True, "navbar_show": False},
+            correlations=None,  # Not relevant here
+            missing_diagrams=None,  # Tested in previous step
+        )
+
+        self.html = profile.to_html()
         self.next(self.end)
 
     @step
