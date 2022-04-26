@@ -36,7 +36,7 @@ It's annoying when your code has gotten halfway through a pipeline only to tail.
 
 Metaflow automatically checkpoints the steps of your flow and lets you `resume` a run after fixing any issues, saving you having to re-run the whole pipeline or maintain your own checkpointing logic (that may be fraught with conflicts between different run parameters).
 
-## Best practices
+## Suggested practices
 
 ### Writing flows
 
@@ -63,7 +63,7 @@ Metaflow automatically checkpoints the steps of your flow and lets you `resume` 
     -   Setup such as parsing and logging parameters or declaring context managers
     -   At most a few high-level function calls
     -   Any flow-level logic - e.g. merging artifacts
--   Add type-annotations for the data artifacts
+-   Consider using type-annotations for the data artifacts
 -   Imports used within a step should always go within a step (at the top of it)
 
     Because metaflow has the ability to abstract infrastructure then
@@ -81,7 +81,8 @@ Metaflow automatically checkpoints the steps of your flow and lets you `resume` 
     If dataframes are persisted as regular Python data-structure, the
     downstream consumer can still generate a dataframe if they want.
 
--   Only use Metaflow's conda decorators when you definitely need them
+-   When data is too large to be saved as a data artifact (not enough RAM or pickling/unpickling is inefficient) ... TODO
+
 -   Docstrings for steps:
     -   Always for `start` and `end` - their name cannot convey any information about what the step does
     -   For any step whose name cannot convey the essence of the step or for complex steps (steps that are more than one or two well documented function calls)
@@ -97,6 +98,7 @@ Metaflow automatically checkpoints the steps of your flow and lets you `resume` 
 -   Use `datastore=s3` with `--production` to run your flow such that the artifacts can be seen by another user.
 -   Use the namespace relating to your `@project` name, e.g. if you're using `@project(name="kuebiko")` for your flows, use `metaflow.namespace("project:kuebiko")`
     -   Setting that in `kuebiko/__init__.py` means it gets set whenever you use a getter
+-   Using `--metadata service` (the default) means that your flow metadata will be visible via. the Metaflow UI at https://dap-tools.uk (more information will be available if using the S3 datastore too)!
 
 ## Things to watch out for
 
