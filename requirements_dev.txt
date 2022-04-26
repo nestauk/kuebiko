@@ -18,3 +18,9 @@ mkdocs
 mkdocs-material
 mkdocs-material-extensions
 setuptools<58
+hypothesis
+mypy
+pydeps
+types-requests
+types-selenium
+types-beautifulsoup4
