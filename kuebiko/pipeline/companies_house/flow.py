@@ -1,9 +1,6 @@
 from datetime import datetime, timedelta
-from io import BytesIO
 from typing import Any, Dict
-from zipfile import ZipFile
 
-import requests
 from metaflow import (
     card,
     conda_base,
@@ -26,8 +23,15 @@ field_name = str
 company_number = str
 
 
-def download_zip(url: str) -> ZipFile:  # TODO: refactor
+def download_zip(url: str) -> "ZipFile":
     """Download a URL and load into `ZipFile`."""
+    from io import BytesIO
+    from zipfile import ZipFile
+
+    import requests
+
+    ## `download_zip` also exists in the NSPL flow so should probably be a
+    ## project-level utility; however we duplicate here for pedagogical simplicity
     response = requests.get(url)
     response.raise_for_status()
     return ZipFile(BytesIO(response.content), "r")
@@ -119,12 +123,15 @@ class CompaniesHouseDump(FlowSpec):
         ## Due to the atomic nature of the following few steps in this flow,
         ## docstrings would just repeat either/both of the step name or the
         ## docstring of the single functions they tend to call.
+        from tempfile import gettempdir
+
         import requests_cache
 
         from utils import read_companies_house_chunk
 
         if not current.is_production:
-            requests_cache.install_cache("ch_zip_cache")
+            print("USING REQUESTS CACHE")
+            requests_cache.install_cache(f"{gettempdir()}/ch_zip_cache")
 
         ## Use of `requests_cache` means we need to download the zipfile rather
         ## than giving a URL directly with `pandas.read_csv(..., compression="zip")`

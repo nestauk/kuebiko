@@ -116,6 +116,7 @@ class NsplLookup(FlowSpec):
     def get_data(self):
         """Download zipped NSPL collection, extracting main lookup & LAUA names."""
         import logging
+        from tempfile import gettempdir
 
         import requests_cache
 
@@ -149,7 +150,7 @@ class NsplLookup(FlowSpec):
         ## We can also make sure that if the `--production` flag is used then
         ## the file is re-downloaded rather than risking an invalid cache/local copy.
         if not current.is_production:
-            requests_cache.install_cache("nspl_zip_cache")
+            requests_cache.install_cache(f"{gettempdir()}/nspl_zip_cache")
         with download_zip(self.download_url) as zipfile:
             # Load main postcode lookup
             self.nspl_data = read_nspl_data(zipfile, nrows).pipe(filter_nspl_data)
