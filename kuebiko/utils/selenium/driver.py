@@ -19,21 +19,6 @@ def chrome_driver() -> WebDriver:
     return driver
 
 
-def _quit(driver: WebDriver) -> None:
-    try:
-        driver.quit()
-    except WebDriverException as exc:  # Aggressive fallback
-        process = driver.service.process  # NOTE: chrome specific
-        logging.error(
-            f"Failed to close old driver: '{exc}'. Killing pid {process.pid}."
-        )
-        process.kill()
-        try:
-            process.wait(5)
-        except TimeoutExpired:  # pragma: nocover
-            logging.warning(f"Failed to wait for {process.pid} to terminate.")
-
-
 class DriverContainer(object):
     """Callable wrapper for Selenium driver that returns a new driver after crash."""
 
@@ -71,3 +56,18 @@ class DriverContainer(object):
         except Exception as e:  # pragma: nocover
             logging.error(f"Failed to create new driver instance on restart: {e}")
             raise e
+
+
+def _quit(driver: WebDriver) -> None:
+    try:
+        driver.quit()
+    except WebDriverException as exc:  # Aggressive fallback
+        process = driver.service.process  # NOTE: chrome specific
+        logging.error(
+            f"Failed to close old driver: '{exc}'. Killing pid {process.pid}."
+        )
+        process.kill()
+        try:
+            process.wait(5)
+        except TimeoutExpired:  # pragma: nocover
+            logging.warning(f"Failed to wait for {process.pid} to terminate.")

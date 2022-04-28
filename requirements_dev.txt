@@ -24,3 +24,4 @@ pydeps
 types-requests
 types-selenium
 types-beautifulsoup4
+pytest-env

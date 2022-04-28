@@ -58,31 +58,17 @@ def get_page(
     driver_container: DriverContainer, url: Url
 ) -> Tuple[str, Optional[str], Optional[Tuple[Any, Any, Any]]]:
     """Get page source and network data of `url`."""
+    ## When a Selenium GETs a page - dismiss any javascript alerts and wait for
+    ## the `"complete"` document ready state [1] which is a reasonable
+    ## simple heuristic to indicate that a page has finished loading
+    ## [1] https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
     callback = compose_left(dismiss_alerts, wait_for_readystate_complete)
     driver = get_with_retry(driver_container, url, callback=callback)
 
-    if not driver:  # Couldn't get `url` for non-transient reason
+    if driver is None:  # Couldn't get `url` for non-transient reason
         return str(url), None, None
     else:
         return str(url), driver.page_source, get_network_data(driver)
-
-
-# %% Network helpers
-
-
-def _page_size(resource) -> float:
-    # kB
-    return sum((x["transferSize"] for x in resource)) / 1000
-
-
-def _paint_time(paint) -> float:
-    # ms
-    return float(paint[0]["startTime"])
-
-
-def _dom_time(navigation) -> float:
-    # ms
-    return float(navigation["domComplete"])
 
 
 class PageStats(TypedDict):
@@ -101,3 +87,18 @@ def page_stats(network_data: tuple) -> PageStats:
         "paint_time": _paint_time(paint) if paint else None,
         "dom_time": _dom_time(navigation) if navigation else None,
     }
+
+
+def _page_size(resource) -> float:
+    # kB
+    return sum((x["transferSize"] for x in resource)) / 1000
+
+
+def _paint_time(paint) -> float:
+    # ms
+    return float(paint[0]["startTime"])
+
+
+def _dom_time(navigation) -> float:
+    # ms
+    return float(navigation["domComplete"])

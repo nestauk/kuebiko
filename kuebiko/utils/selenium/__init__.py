@@ -17,4 +17,6 @@ __all__ = [
     "wait_for_readystate_complete",
 ]
 
-# TODO: https://selenium-python.readthedocs.io/api.html#module-selenium.webdriver.support.abstract_event_listener  # noqa: B950
+# TODO: can bits be simplified by using
+# https://selenium-python.readthedocs.io/api.html#module-selenium.webdriver.support.abstract_event_listener  # noqa: B950
+# ?

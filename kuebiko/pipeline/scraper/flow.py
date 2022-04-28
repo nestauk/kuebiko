@@ -22,11 +22,8 @@ class UkBusinessHomepageScrape(FlowSpec):
 
     ## This is a heavy duty flow we want to run on many machines on Batch, so
     ## we need a way to distribute our data.
-    ## If we used the getter `kuebiko.getters.inputs.url.get_urls` then the
-    ## underlying file would be missing (it only exists locally on our
-    ## hard-drive, not in the cloud).
-    ## We could run `make inputs-push`, and then in the `start` step download
-    ## the data from our bucket, but `IncludeFile` is just a lot more convenient.
+    ## We could take an S3 path as a parameter and fetch the data from there;
+    ## however we choose to use `IncludeFile` because it's (arguably) simpler.
     url_list = IncludeFile(
         "url-list", required=True, help="Newline delimited set of URL's to scrape."
     )
@@ -47,7 +44,8 @@ class UkBusinessHomepageScrape(FlowSpec):
         from kuebiko.utils.url import default_to_http
 
         self.test = self.test_mode and not current.is_production
-        chunk_size = self.test_size // 4 if self.test else 1_000
+        test_size = 100  # Number of URL's to use in test mode
+        chunk_size = test_size // 4 if self.test else 1_000
 
         ## Assign this composition to a variable so the pipeline below is more readable
         line_to_url = t.compose_left(str.strip, parse_url, default_to_http)
@@ -56,11 +54,11 @@ class UkBusinessHomepageScrape(FlowSpec):
         ## Reading inside out...
         ## ```python
         ## self.url_chunks = list(
-        ##     t.partition(
+        ##     t.partition_all(
         ##         chunk_size,
         ##         t.take(
-        ##             None if not self.test else self.test_size,
-        ##             (line_to_url(url) for url in self.url_list.split("\n")),
+        ##             None if not self.test else test_size,
+        ##             (line_to_url(url) for url in self.url_list.split("\n") if url != ""),
         ##         ),
         ##     )
         ## )
@@ -68,15 +66,15 @@ class UkBusinessHomepageScrape(FlowSpec):
         ## Or having to give redundant names or over-write variables every
         ## individual step...
         ## ```python
-        ## urls = [line_to_url(url) for url in self.url_list.split("\n")]
-        ## urls = t.take(None if not self.test else self.test_size)
-        ## self.url_chunks = list(t.partition(chunk_size, urls))
+        ## urls = [line_to_url(url) for url in self.url_list.split("\n") if url != ""]
+        ## urls = t.take(None if not self.test else test_size)
+        ## self.url_chunks = list(t.partition_all(chunk_size, urls))
         ## ```
         self.url_chunks = t.pipe(
             self.url_list.split("\n"),
             t.filter(None),  # Filter empty lines
             t.map(line_to_url),
-            t.take(None if not self.test else self.test_size),  # None means take all
+            t.take(None if not self.test else test_size),  # None means take all
             t.partition_all(chunk_size),
             list,
         )
@@ -84,11 +82,13 @@ class UkBusinessHomepageScrape(FlowSpec):
         self.next(self.fork, foreach="url_chunks")
 
     @pip(path="requirements.txt")
-    @retry(times=2, minutes_between_retries=1)
+    ## If a task crashes we retry it again a little time later.
+    ## The delay between retries gives any unavailable resources (e.g. due to
+    ## AWS outages) time to become available again
+    @retry(times=2, minutes_between_retries=20)
     @step
     def fork(self) -> None:
         """Scrape input."""
-        ## TODO: why are the imports here
         from kuebiko.utils.selenium import DriverContainer
         from kuebiko.pipeline.scraper.utils import chrome_scraper, get_page
 

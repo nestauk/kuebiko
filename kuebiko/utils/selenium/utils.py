@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Callable, Optional, Tuple
 
 from selenium.common.exceptions import (
@@ -17,7 +16,7 @@ from .constants import DEFAULT_TIMEOUT
 from .exceptions import BrowserCrashError
 
 
-def raise_exception_on_call(exc: Exception) -> Callable:
+def _raise_exception_on_call(exc: Exception) -> Callable:
     """Return function that when called will raise `exc`."""
 
     def delayed(state: RetryCallState) -> None:
@@ -29,7 +28,7 @@ def raise_exception_on_call(exc: Exception) -> Callable:
 @retry(
     stop=stop_after_attempt(10),
     retry=retry_if_exception_type(UnexpectedAlertPresentException),
-    retry_error_callback=raise_exception_on_call(BrowserCrashError("alert bomb")),
+    retry_error_callback=_raise_exception_on_call(BrowserCrashError("alert bomb")),
 )
 def dismiss_alerts(driver: Optional[WebDriver]) -> Optional[WebDriver]:
     """Unexpected alerts prevent us extracting data, protect against it."""
@@ -44,18 +43,6 @@ def dismiss_alerts(driver: Optional[WebDriver]) -> Optional[WebDriver]:
         driver.execute_script("")  # current_url
 
     return driver
-
-
-def log_retry_error_return_none(retry_state: RetryCallState) -> None:
-    """Log Tenacity retry error and return `None`."""
-    url = retry_state.args[1]
-    try:  # This should raise an error
-        retry_state.outcome and retry_state.outcome.result()
-    except Exception as exc:
-        exc_type = type(exc).__qualname__
-        logging.warning(f"Retry of 'get_with_retry' for '{url}' failed with {exc_type}")
-
-    return None
 
 
 def get_network_data(driver: WebDriver) -> Tuple[Any, Any, Any]:  # TODO

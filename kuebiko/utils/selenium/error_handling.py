@@ -50,7 +50,7 @@ def _is_chrome_network_error(msg: str) -> bool:
 
 def _is_scheme_error(exc: WebDriverException, url: Url) -> bool:
     ## Combine small functions to create more complex one
-    return True if _is_chrome_network_error(exc.msg) and url.scheme != "http" else False
+    return True if _is_chrome_network_error(exc.msg) and url.scheme != "http" else False  # type: ignore # noqa
 
 
 def _is_timeout_error(exc: Exception) -> bool:

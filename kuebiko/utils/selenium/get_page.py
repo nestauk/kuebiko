@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from tenacity import (
     retry,
     retry_if_exception_type,
+    RetryCallState,
     stop_after_attempt,
     wait_fixed,
 )
@@ -18,7 +19,18 @@ from kuebiko.utils.url import use_http
 from .constants import DEFAULT_RETRIES, DEFAULT_RETRY_WAIT
 from .error_handling import handle_webdriver_exception
 from .exceptions import BrowserCrashError, PossibleSchemeError
-from .utils import log_retry_error_return_none
+
+
+def _log_retry_error_return_none(retry_state: RetryCallState) -> None:
+    """Log Tenacity retry error and return `None`."""
+    url = retry_state.args[1]
+    try:  # This should raise an error
+        retry_state.outcome and retry_state.outcome.result()
+    except Exception as exc:
+        exc_type = type(exc).__qualname__
+        logging.warning(f"Retry of 'get_with_retry' for '{url}' failed with {exc_type}")
+
+    return None
 
 
 @retry(
@@ -29,7 +41,7 @@ from .utils import log_retry_error_return_none
     ),
     before=lambda state: logging.debug(f"GET {state.args[1]}"),
     before_sleep=lambda state: logging.debug(f"Retry GET {state.args[1]}"),
-    retry_error_callback=log_retry_error_return_none,
+    retry_error_callback=_log_retry_error_return_none,
     stop=stop_after_attempt(DEFAULT_RETRIES),
 )
 def get_with_retry(
@@ -61,4 +73,4 @@ def get(
 
         return driver
     except WebDriverException as exc:
-        return handle_webdriver_exception(exc, url)
+        return handle_webdriver_exception(exc, url)  # type: ignore
