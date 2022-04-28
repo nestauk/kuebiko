@@ -61,5 +61,4 @@ def get(
 
         return driver
     except WebDriverException as exc:
-        handle_webdriver_exception(exc, url)
-    return None
+        return handle_webdriver_exception(exc, url)

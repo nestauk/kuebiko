@@ -90,3 +90,4 @@ def handle_webdriver_exception(exc: WebDriverException, url: Url) -> None:
     else:
         logging.error(f"Unknown error pathway @ {url}: {exc.msg}")
         raise WebDriverException(*exc.args)
+    return None

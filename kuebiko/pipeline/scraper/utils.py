@@ -14,8 +14,6 @@ from kuebiko.utils.selenium import (
     wait_for_readystate_complete,
 )
 
-
-# %%
 DEFAULT_TIMEOUT = 10
 
 

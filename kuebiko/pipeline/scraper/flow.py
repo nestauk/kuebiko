@@ -31,7 +31,12 @@ class UkBusinessHomepageScrape(FlowSpec):
         "url-list", required=True, help="Newline delimited set of URL's to scrape."
     )
 
-    test = Parameter("test", default=True, type=bool)
+    test_mode = Parameter(
+        "test-mode",
+        help="Whether to run in test mode",
+        type=bool,
+        default=lambda _: not current.is_production,
+    )
     test_size = Parameter("test-size", default=100, type=int)
 
     @pip(path="requirements.txt", safe=False)
@@ -41,6 +46,7 @@ class UkBusinessHomepageScrape(FlowSpec):
         import toolz.curried as t
         from kuebiko.utils.url import default_to_http
 
+        self.test = self.test_mode and not current.is_production
         chunk_size = self.test_size // 4 if self.test else 1_000
 
         ## Assign this composition to a variable so the pipeline below is more readable
@@ -68,6 +74,7 @@ class UkBusinessHomepageScrape(FlowSpec):
         ## ```
         self.url_chunks = t.pipe(
             self.url_list.split("\n"),
+            t.filter(None),  # Filter empty lines
             t.map(line_to_url),
             t.take(None if not self.test else self.test_size),  # None means take all
             t.partition_all(chunk_size),
