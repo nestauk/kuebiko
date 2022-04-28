@@ -23,20 +23,6 @@ field_name = str
 company_number = str
 
 
-def download_zip(url: str) -> "ZipFile":
-    """Download a URL and load into `ZipFile`."""
-    from io import BytesIO
-    from zipfile import ZipFile
-
-    import requests
-
-    ## `download_zip` also exists in the NSPL flow so should probably be a
-    ## project-level utility; however we duplicate here for pedagogical simplicity
-    response = requests.get(url)
-    response.raise_for_status()
-    return ZipFile(BytesIO(response.content), "r")
-
-
 @conda_base(
     libraries={
         "pandas": "1.1.5",
@@ -127,7 +113,7 @@ class CompaniesHouseDump(FlowSpec):
 
         import requests_cache
 
-        from utils import read_companies_house_chunk
+        from utils import download_zip, read_companies_house_chunk
 
         if not current.is_production:
             print("USING REQUESTS CACHE")

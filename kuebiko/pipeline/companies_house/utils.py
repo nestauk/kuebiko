@@ -1,7 +1,9 @@
 """Companies House data processing."""
+from io import BytesIO
 from zipfile import ZipFile
 
 import pandas as pd
+import requests
 
 
 COLUMN_MAPPINGS = {
@@ -26,6 +28,16 @@ COLUMN_MAPPINGS = {
     "SICCode.SicText_3": "sic_3",
     "SICCode.SicText_4": "sic_4",
 }
+
+
+def download_zip(url: str) -> ZipFile:
+    """Download a URL and load into `ZipFile`."""
+
+    ## `download_zip` also exists in the NSPL flow so should probably be a
+    ## project-level utility; however we duplicate here for pedagogical simplicity
+    response = requests.get(url)
+    response.raise_for_status()
+    return ZipFile(BytesIO(response.content), "r")
 
 
 def read_companies_house_chunk(zipfile: ZipFile) -> pd.DataFrame:
