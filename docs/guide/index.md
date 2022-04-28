@@ -2,7 +2,7 @@
 
 > Kuebiko (久延毘古) is the Shinto kami ("god; deity") of Folk wisdom, knowledge and agriculture, and is represented in Japanese mythology as a scarecrow who cannot walk but has comprehensive awareness.
 
-A "full" (see [Corners cut](#corners-cut)) example [`ds-cookiecutter`](http://nestauk.github.io/ds-cookiecutter/) project broken down into episodes, with annotations/narrative for each episode focusing on a different aspect. In addition, there are a set of reference guides consolidating key concepts and pointing to further resources.
+An :warning: INCOMPLETE :warning: "full" (see [Corners cut](#corners-cut)) example [`ds-cookiecutter`](http://nestauk.github.io/ds-cookiecutter/) project broken down into episodes, with annotations/narrative for each episode focusing on a different aspect. In addition, there are a set of reference guides consolidating key concepts and pointing to further resources.
 
 !!! warning "Not from around these parts? A disclaimer..."
 
@@ -30,15 +30,15 @@ Below is a list of provisional episodes. See [issues labeled `episode`](https://
 
 -   [x] 0. Setup
 -   [x] 1. Metaflow basics - fetching auxiliary data from the web
--   [ ] 2. Getting data from SQL - fetching NOMIS auxiliary data
+-   [ ] ~2. Getting data from SQL - fetching NOMIS auxiliary data~
 -   [ ] 3. Critical coding - web-scraping utilities
 -   [ ] 4. Metaflow on AWS batch - scaling a web-scraper
 -   [ ] 5. Advanced data getters - extracting and explored scraped data
--   [ ] 6. Data analysis - answering stakeholders first 3 questions
--   [ ] 7. Perfect is the enemy of good - Company description extraction
--   [ ] 8. Metaflow on AWS batch with a GPU - transformers
--   [ ] 9. The fine line between analysis and pipeline - answering stakeholders final question
--   [ ] 10. Refactoring
+-   [ ] ~6. Data analysis - answering stakeholders first 3 questions~
+-   [ ] ~7. Perfect is the enemy of good - Company description extraction~
+-   [ ] ~8. Metaflow on AWS batch with a GPU - transformers~
+-   [ ] ~9. The fine line between analysis and pipeline - answering stakeholders final question~
+-   [ ] ~10. Refactoring~
 
 Further episodes may be added as further use-cases arise, further guidelines are developed or new technologies adopted (e.g. AWS step-functions).
 
@@ -74,8 +74,8 @@ This is a MVP of a data science project following the `ds-cookiecutter` workflow
 
 ### Miscellaneous notes
 
--   To avoid covering too much at once, early episodes are missing important things such as tests and data quality and data validation. These are covered a few episodes in and are retrospectively added at that point; **however** in a real project tests should always be written at the same time as the code they test (or even before if you are a proponent of test driven development)!
+-   To avoid covering too much at once, early episodes may neglect important things such as tests and data quality and data validation. In a real project tests should always be written at the same time as the code they test (or even before if you are a proponent of test driven development)!
 -   When an episode gets opened for review then the code is only in a state/quality that any other PR might be at when a review is requested. I.e. there will be mistakes/shortcomings so it's up to DAP as a community to help improve things.
     There are a few deliberate "mistakes" throughout, try and spot them
     and raise it in review.
--   The [`ds-cookiecutter` template](https://github.com/nestauk/ds-cookiecutter/pull/92) this is based on has not yet been merged (awaiting further reviews)
+-   Based on [`ds-cookiecutter==0.1.1`](https://github.com/nestauk/ds-cookiecutter/releases/tag/v0.1.1)
