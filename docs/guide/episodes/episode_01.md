@@ -69,7 +69,7 @@ The flow code can found in [`kuebiko/pipeline/companies_house/flow.py`\*](../pyc
 
 Running `python kuebiko/pipeline/companies_house/flow.py --environment conda run` will run the flow.
 
-:flame: Check out the [data quality report]() in the Metaflow UI :books:
+:flame: Check out the [data quality reports](https://dap-tools.uk/CompaniesHouseDump/3597/join_foreach/28617?direction=asc&group=true&order=startTime&section=91252a10e92532a10f063fc80ca85c8fcc07cec4) in the Metaflow UI :books:
 
 ## A short investigation into artifact overheads
 
