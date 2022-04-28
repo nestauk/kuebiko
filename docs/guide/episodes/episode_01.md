@@ -56,6 +56,8 @@ The flow code can found in [`kuebiko/pipeline/nspl/flow.py`\*](../pycco/kuebiko/
 
 Running `python kuebiko/pipeline/nspl/flow.py --environment=conda run` will run the flow.
 
+:flame: Check out the [data quality report](https://dap-tools.uk/NsplLookup/3593/data_quality_report/28522?direction=desc&group=false&order=startTime&section=cf101562b5bab00ad867196dbcb99d17dd57f36f&status) in the Metaflow UI :books:
+
 ## Companies House
 
 The third dataset that is fetched and processed is the Companies House (UK company registrar) monthly data dump.
@@ -65,7 +67,9 @@ Each registered UK company has a company number. By finding company numbers on w
 The flow code can found in [`kuebiko/pipeline/companies_house/flow.py`\*](../pycco/kuebiko/pipeline/companies_house/flow.html), its utility functions (which are not a focus of this episode) in [`kuebiko/pipeline/companies_house/utils.py`](../pycco/kuebiko/pipeline/companies_house/utils.html), and its getters in [`kuebiko/getters/companies_house.py`\*](../pycco/kuebiko/getters/companies_house.html)
 .
 
-Running `python kuebiko/pipeline/companies_house/flow.py run` will run the flow.
+Running `python kuebiko/pipeline/companies_house/flow.py --environment conda run` will run the flow.
+
+:flame: Check out the [data quality report]() in the Metaflow UI :books:
 
 ## A short investigation into artifact overheads
 
