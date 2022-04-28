@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>test_url.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>test_url.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hypothesis</span> <span class="kn">import</span> <span class="n">example</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">hypothesis.provisional</span> <span class="kn">import</span> <span class="n">urls</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.url</span> <span class="kn">import</span> <span class="n">parse_url</span><span class="p">,</span> <span class="n">Url</span>
+
+<span class="kn">from</span> <span class="nn">kuebiko.utils.url</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">default_to_http</span><span class="p">,</span>
+    <span class="n">default_to_https</span><span class="p">,</span>
+    <span class="n">is_internal_link</span><span class="p">,</span>
+    <span class="n">resolve_link</span><span class="p">,</span>
+    <span class="n">use_http</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">settings</span><span class="o">.</span><span class="n">register_profile</span><span class="p">(</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">max_examples</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">register_profile</span><span class="p">(</span><span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="n">max_examples</span><span class="o">=</span><span class="mi">10_000</span><span class="p">)</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">load_profile</span><span class="p">(</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
+
+
+<span class="n">GOOD_URL</span> <span class="o">=</span> <span class="s2">&quot;https://nesta.org.uk/about&quot;</span>
+<span class="n">PATH_ONLY</span> <span class="o">=</span> <span class="s2">&quot;/path_only&quot;</span>
+<span class="n">MISSING_SCHEME</span> <span class="o">=</span> <span class="s2">&quot;missing_scheme.com&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@given</span><span class="p">(</span><span class="n">urls</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_use_http_gen</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">use_http</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+
+<span class="nd">@given</span><span class="p">(</span><span class="n">urls</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">MISSING_SCHEME</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_default_to_http</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">default_to_http</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+
+<span class="nd">@given</span><span class="p">(</span><span class="n">urls</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">MISSING_SCHEME</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_default_to_https</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">default_to_https</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+
+<span class="nd">@given</span><span class="p">(</span><span class="n">urls</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_is_internal_link</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+
+    <span class="c1"># Self identical</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_internal_link</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_internalise</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Drop host and ensure a path exists.&quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span>
+        <span class="k">return</span> <span class="n">Url</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># Relative links are internal</span>
+    <span class="n">internal_url</span> <span class="o">=</span> <span class="n">_internalise</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_internal_link</span><span class="p">(</span><span class="n">internal_url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_externalise</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change host to be different.&quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s2">&quot;host&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;_diff&quot;</span>
+        <span class="k">return</span> <span class="n">Url</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># Different hosts are not internal</span>
+    <span class="n">external_url</span> <span class="o">=</span> <span class="n">_externalise</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_internal_link</span><span class="p">(</span><span class="n">external_url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+
+<span class="nd">@given</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="n">urls</span><span class="p">(),</span> <span class="n">s2</span><span class="o">=</span><span class="n">urls</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="n">PATH_ONLY</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="n">PATH_ONLY</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="n">PATH_ONLY</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="n">MISSING_SCHEME</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="n">MISSING_SCHEME</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="n">PATH_ONLY</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="n">GOOD_URL</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="n">s1</span><span class="o">=</span><span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="n">PATH_ONLY</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_resolve_link</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+    <span class="n">url1</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
+    <span class="n">url2</span> <span class="o">=</span> <span class="n">parse_url</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+    <span class="n">resolve_link</span><span class="p">(</span><span class="n">url1</span><span class="p">,</span> <span class="n">url2</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

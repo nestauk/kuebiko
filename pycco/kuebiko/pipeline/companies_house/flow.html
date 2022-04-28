@@ -23,7 +23,16 @@
       <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
 
-<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="n">current</span><span class="p">,</span> <span class="n">FlowSpec</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">step</span>
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">card</span><span class="p">,</span>
+    <span class="n">conda_base</span><span class="p">,</span>
+    <span class="n">current</span><span class="p">,</span>
+    <span class="n">FlowSpec</span><span class="p">,</span>
+    <span class="n">Parameter</span><span class="p">,</span>
+    <span class="n">project</span><span class="p">,</span>
+    <span class="n">resources</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">DATA_DUMP_URL_FORMAT</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">&quot;https://download.companieshouse.gov.uk/&quot;</span>
@@ -45,7 +54,14 @@
       
     </div>
     <div class='code'>
-      <div class="highlight"><pre><span class="nd">@project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;kuebiko&quot;</span><span class="p">)</span>
+      <div class="highlight"><pre><span class="nd">@conda_base</span><span class="p">(</span>
+    <span class="n">libraries</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;pandas&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pandas-profiling&quot;</span><span class="p">:</span> <span class="s2">&quot;3.1.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;requests-cache&quot;</span><span class="p">:</span> <span class="s2">&quot;0.4.13&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="nd">@project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;kuebiko&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">CompaniesHouseDump</span><span class="p">(</span><span class="n">FlowSpec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Companies House monthly data dump.</span>
 
@@ -163,9 +179,15 @@ docstrings would just repeat either/both of the step name or the
 docstring of the single functions they tend to call.</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">read_from_url</span>
+      <div class="highlight"><pre>        <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">gettempdir</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">read_from_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">)</span></pre></div>
+        <span class="kn">import</span> <span class="nn">requests_cache</span>
+
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">download_zip</span><span class="p">,</span> <span class="n">read_companies_house_chunk</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USING REQUESTS CACHE&quot;</span><span class="p">)</span>
+            <span class="n">requests_cache</span><span class="o">.</span><span class="n">install_cache</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gettempdir</span><span class="p">()</span><span class="si">}</span><span class="s2">/ch_zip_cache&quot;</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -174,10 +196,12 @@ docstring of the single functions they tend to call.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-6'>#</a>
       </div>
-      <p>Each fork (corresponding to one URL chunk), forks a further three times</p>
+      <p>Use of <code>requests_cache</code> means we need to download the zipfile rather
+than giving a URL directly with <code>pandas.read_csv(..., compression="zip")</code></p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_organisation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_sectors</span><span class="p">)</span></pre></div>
+      <div class="highlight"><pre>        <span class="k">with</span> <span class="n">download_zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipfile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">read_companies_house_chunk</span><span class="p">(</span><span class="n">zipfile</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -185,6 +209,18 @@ docstring of the single functions they tend to call.</p>
     <div class='docs'>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Each fork (corresponding to one URL chunk), forks a further three times</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_organisation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_sectors</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
       </div>
       
     </div>
@@ -212,10 +248,10 @@ docstring of the single functions they tend to call.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-8'>
+  <div class='section' id='section-9'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-8'>#</a>
+        <a class='octothorpe' href='#section-9'>#</a>
       </div>
       <p>Forks must be joined in reverse order</p>
     </div>
@@ -228,10 +264,10 @@ docstring of the single functions they tend to call.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-9'>
+  <div class='section' id='section-10'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-9'>#</a>
+        <a class='octothorpe' href='#section-10'>#</a>
       </div>
       <p>This step involves loading several large data artifacts; however there
 is no way to separate this out into multiple extra steps to minimise RAM
@@ -239,35 +275,33 @@ because a join step must resolve all artifacts. The only solution is to
 have a big enough machine.</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>    <span class="nd">@step</span>
+      <div class="highlight"><pre>    <span class="nd">@card</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;attribute&quot;</span><span class="p">:</span> <span class="s2">&quot;html_sectors&quot;</span><span class="p">},</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;Sectors&quot;</span><span class="p">)</span>
+    <span class="nd">@card</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;attribute&quot;</span><span class="p">:</span> <span class="s2">&quot;html_organisations&quot;</span><span class="p">},</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;Organisations&quot;</span><span class="p">)</span>
+    <span class="nd">@card</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;attribute&quot;</span><span class="p">:</span> <span class="s2">&quot;html_addresses&quot;</span><span class="p">},</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;Addresses&quot;</span><span class="p">)</span>
+    <span class="nd">@resources</span><span class="p">(</span><span class="n">memory</span><span class="o">=</span><span class="mi">32_000</span><span class="p">)</span>
+    <span class="nd">@step</span>
     <span class="k">def</span> <span class="nf">join_foreach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Merge artifacts of different data chunks together.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">logging</span>
-
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">concat</span>
+        <span class="kn">from</span> <span class="nn">pandas_profiling</span> <span class="kn">import</span> <span class="n">ProfileReport</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">organisations</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">addresses</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">sectors</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">merge_artifacts</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;raw&quot;</span><span class="p">])</span></pre></div>
-    </div>
-  </div>
-  <div class='clearall'></div>
-  <div class='section' id='section-10'>
-    <div class='docs'>
-      <div class='octowrap'>
-        <a class='octothorpe' href='#section-10'>#</a>
-      </div>
-      <p>We can save metadata such as dataframe lengths as an artifact, which
-can come in useful for debugging/monitoring/experiment tracking</p>
-    </div>
-    <div class='code'>
-      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;organisations&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-                <span class="s2">&quot;addresses&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-                <span class="s2">&quot;sectors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sectors</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span></pre></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merge_artifacts</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;raw&quot;</span><span class="p">])</span>
+
+        <span class="n">profile_options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;progress_bar&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;minify_html&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;navbar_show&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+            <span class="s2">&quot;correlations&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;interactions&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">html_sectors</span> <span class="o">=</span> <span class="n">ProfileReport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sectors</span><span class="p">,</span> <span class="o">**</span><span class="n">profile_options</span><span class="p">)</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">html_organisations</span> <span class="o">=</span> <span class="n">ProfileReport</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">organisations</span><span class="p">,</span> <span class="o">**</span><span class="n">profile_options</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">html_addresses</span> <span class="o">=</span> <span class="n">ProfileReport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addresses</span><span class="p">,</span> <span class="o">**</span><span class="n">profile_options</span><span class="p">)</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -275,28 +309,6 @@ can come in useful for debugging/monitoring/experiment tracking</p>
     <div class='docs'>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-11'>#</a>
-      </div>
-      <p>Whether DRY is a good idea is subjective here, is the
-decreased readability of the following worth it?</p>
-<pre><code class="language-python">self.metadata = {
-    &quot;lengths&quot;: {
-        attr: getattr(self, attr).shape
-        for attr in [&quot;organisations&quot;, &quot;addresses&quot;, &quot;sectors&quot;]
-    }
-}
-</code></pre>
-    </div>
-    <div class='code'>
-      <div class="highlight"><pre>            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></pre></div>
-    </div>
-  </div>
-  <div class='clearall'></div>
-  <div class='section' id='section-12'>
-    <div class='docs'>
-      <div class='octowrap'>
-        <a class='octothorpe' href='#section-12'>#</a>
       </div>
       <p>It may be more logical to put this conversion from one data type to
 another in the <code>end</code> step; however because the data artifacts are
@@ -313,10 +325,10 @@ artifacts, so we keep it here.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-13'>
+  <div class='section' id='section-12'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-13'>#</a>
+        <a class='octothorpe' href='#section-12'>#</a>
       </div>
       <p>Join steps have to be distinct, so we can&rsquo;t do the joining logic in <code>end</code></p>
     </div>

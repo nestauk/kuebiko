@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>test_driver_destructive.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>test_driver_destructive.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Isolated test module due to destructing module scoped fixture, `driver_container`.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="kn">import</span> <span class="n">MagicMock</span>
+
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="n">WebDriverException</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">test_dunder_exit_falls_back_on_kill</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">):</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">quit</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">(</span>
+        <span class="n">side_effect</span><span class="o">=</span><span class="n">WebDriverException</span><span class="p">(</span><span class="s2">&quot;Failed to quit&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">mock_driver_container</span> <span class="k">as</span> <span class="n">driver_container</span><span class="p">:</span>
+        <span class="n">driver_process</span> <span class="o">=</span> <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">process</span>
+    <span class="k">assert</span> <span class="n">driver_process</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Process not terminated&quot;</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

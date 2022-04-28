@@ -23,6 +23,7 @@
       <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">card</span><span class="p">,</span>
     <span class="n">conda_base</span><span class="p">,</span>
     <span class="n">current</span><span class="p">,</span>
     <span class="n">FlowSpec</span><span class="p">,</span>
@@ -74,7 +75,8 @@ and only use Metaflow&rsquo;s conda decorators when you definitely need them</st
     </div>
     <div class='code'>
       <div class="highlight"><pre>    <span class="n">libraries</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;pandas&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pandas&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pandas-profiling&quot;</span><span class="p">:</span> <span class="s2">&quot;3.1.0&quot;</span><span class="p">,</span>
         <span class="s2">&quot;selenium&quot;</span><span class="p">:</span> <span class="s2">&quot;3.141.0&quot;</span><span class="p">,</span>
         <span class="s2">&quot;requests-cache&quot;</span><span class="p">:</span> <span class="s2">&quot;0.4.13&quot;</span><span class="p">,</span>
     <span class="p">}</span>
@@ -205,6 +207,7 @@ We recommend that by default <code>test-mode</code> is either:</p>
     <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Download zipped NSPL collection, extracting main lookup &amp; LAUA names.&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">logging</span>
+        <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">gettempdir</span>
 
         <span class="kn">import</span> <span class="nn">requests_cache</span>
 
@@ -256,7 +259,7 @@ the file is re-downloaded rather than risking an invalid cache/local copy.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">:</span>
-            <span class="n">requests_cache</span><span class="o">.</span><span class="n">install_cache</span><span class="p">(</span><span class="s2">&quot;nspl_zip_cache&quot;</span><span class="p">)</span>
+            <span class="n">requests_cache</span><span class="o">.</span><span class="n">install_cache</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gettempdir</span><span class="p">()</span><span class="si">}</span><span class="s2">/nspl_zip_cache&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">download_zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">download_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipfile</span><span class="p">:</span>
             <span class="c1"># Load main postcode lookup</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span> <span class="o">=</span> <span class="n">read_nspl_data</span><span class="p">(</span><span class="n">zipfile</span><span class="p">,</span> <span class="n">nrows</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">filter_nspl_data</span><span class="p">)</span>
@@ -278,7 +281,7 @@ the single responsibility principle.</p>
     <div class='code'>
       <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">laua_names</span> <span class="o">=</span> <span class="n">laua_names_tmp</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_quality</span><span class="p">)</span></pre></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_quality_tests</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -291,7 +294,7 @@ the single responsibility principle.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>    <span class="nd">@step</span>
-    <span class="k">def</span> <span class="nf">data_quality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">data_quality_tests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Data quality checks.&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">LOOSE_UK_BOUNDS</span></pre></div>
     </div>
@@ -303,9 +306,7 @@ the single responsibility principle.</p>
         <a class='octothorpe' href='#section-12'>#</a>
       </div>
       <p>It is always important to check data-quality, both during EDA but
-also during each workflow run.
-We will see some potential better approaches to data quality checks
-in a later episode.</p>
+also during each workflow run.</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>        <span class="c1"># Null checks</span>
@@ -335,7 +336,7 @@ in a later episode.</p>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="o">*</span><span class="n">LOOSE_UK_BOUNDS</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="o">*</span><span class="n">LOOSE_UK_BOUNDS</span><span class="p">[</span><span class="s2">&quot;long&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_quality_report</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -347,7 +348,24 @@ in a later episode.</p>
       
     </div>
     <div class='code'>
-      <div class="highlight"><pre>    <span class="nd">@step</span>
+      <div class="highlight"><pre>    <span class="nd">@card</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;html&quot;</span><span class="p">)</span>  <span class="c1"># TODO: document</span>
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">data_quality_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pandas_profiling</span> <span class="kn">import</span> <span class="n">ProfileReport</span>
+
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">ProfileReport</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nspl_data</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NSPL lookup profile report&quot;</span><span class="p">,</span>
+            <span class="n">progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">html</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;minify_html&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;navbar_show&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+            <span class="n">correlations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Not relevant here</span>
+            <span class="n">missing_diagrams</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Tested in previous step</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">html</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+
+    <span class="nd">@step</span>
     <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
     </div>
   </div>

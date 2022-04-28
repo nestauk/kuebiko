@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>constants.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>constants.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="n">DEFAULT_TIMEOUT</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">CHROME_NETWORK_ERRORS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;ERR_CONNECTION_CLOSED&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_CONNECTION_RESET&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">101</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_CONNECTION_REFUSED&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">102</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_NAME_NOT_RESOLVED&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">105</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_SSL_PROTOCOL_ERR&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">107</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_ADDRESS_UNREACHABLE&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">109</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_SSL_VERSION_OR_CIPHER_MISMATCH&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">113</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_SSL_UNRECOGNIZED_NAME_ALERT&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">159</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_BAD_SSL_CLIENT_AUTH_CERT&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">117</span><span class="p">,</span>
+    <span class="s2">&quot;ERR_SSL_KEY_USAGE_INCOMPATIBLE&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">181</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_RETRIES</span> <span class="o">=</span> <span class="mi">2</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Our tests will run quicker if we&rsquo;re not hanging around waiting for retry</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">DEFAULT_RETRY_WAIT</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="k">if</span> <span class="s2">&quot;IN_PYTEST&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="k">else</span> <span class="mi">2</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

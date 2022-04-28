@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>flow.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>flow.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">metaflow</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">conda_base</span><span class="p">,</span>
+    <span class="n">current</span><span class="p">,</span>
+    <span class="n">FlowSpec</span><span class="p">,</span>
+    <span class="n">IncludeFile</span><span class="p">,</span>
+    <span class="n">Parameter</span><span class="p">,</span>
+    <span class="n">pip</span><span class="p">,</span>
+    <span class="n">project</span><span class="p">,</span>
+    <span class="n">retry</span><span class="p">,</span>
+    <span class="n">S3</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.url</span> <span class="kn">import</span> <span class="n">parse_url</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@conda_base</span><span class="p">(</span><span class="n">python</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span><span class="p">)</span>
+<span class="nd">@project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;kuebiko&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">UkBusinessHomepageScrape</span><span class="p">(</span><span class="n">FlowSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scrape URL&#39;s in `url_list` with Selenium.&quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>This is a heavy duty flow we want to run on many machines on Batch, so
+we need a way to distribute our data.
+We could take an S3 path as a parameter and fetch the data from there;
+however we choose to use <code>IncludeFile</code> because it&rsquo;s (arguably) simpler.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">url_list</span> <span class="o">=</span> <span class="n">IncludeFile</span><span class="p">(</span>
+        <span class="s2">&quot;url-list&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Newline delimited set of URL&#39;s to scrape.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">test_mode</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span>
+        <span class="s2">&quot;test-mode&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to run in test mode&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s2">&quot;test-size&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@pip</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;requirements.txt&quot;</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Chunk `url_list` into chunks.&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">toolz.curried</span> <span class="k">as</span> <span class="nn">t</span>
+        <span class="kn">from</span> <span class="nn">kuebiko.utils.url</span> <span class="kn">import</span> <span class="n">default_to_http</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_mode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">is_production</span>
+        <span class="n">test_size</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># Number of URL&#39;s to use in test mode</span>
+        <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">test_size</span> <span class="o">//</span> <span class="mi">4</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span> <span class="k">else</span> <span class="mi">1_000</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Assign this composition to a variable so the pipeline below is more readable</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">line_to_url</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">compose_left</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">parse_url</span><span class="p">,</span> <span class="n">default_to_http</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Expressing the transformation as a sequence of steps inside pipes
+means we can read in linear order rather than:<br>
+Reading inside out&hellip;</p>
+<pre><code class="language-python">self.url_chunks = list(
+    t.partition_all(
+        chunk_size,
+        t.take(
+            None if not self.test else test_size,
+            (line_to_url(url) for url in self.url_list.split(&quot;\n&quot;) if url != &quot;&quot;),
+        ),
+    )
+)
+</code></pre>
+<p>Or having to give redundant names or over-write variables every
+individual step&hellip;</p>
+<pre><code class="language-python">urls = [line_to_url(url) for url in self.url_list.split(&quot;\n&quot;) if url != &quot;&quot;]
+urls = t.take(None if not self.test else test_size)
+self.url_chunks = list(t.partition_all(chunk_size, urls))
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">url_chunks</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url_list</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>  <span class="c1"># Filter empty lines</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">line_to_url</span><span class="p">),</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span> <span class="k">else</span> <span class="n">test_size</span><span class="p">),</span>  <span class="c1"># None means take all</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">partition_all</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">),</span>
+            <span class="nb">list</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fork</span><span class="p">,</span> <span class="n">foreach</span><span class="o">=</span><span class="s2">&quot;url_chunks&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@pip</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;requirements.txt&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>If a task crashes we retry it again a little time later.
+The delay between retries gives any unavailable resources (e.g. due to
+AWS outages) time to become available again</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@retry</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">minutes_between_retries</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">fork</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Scrape input.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">kuebiko.utils.selenium</span> <span class="kn">import</span> <span class="n">DriverContainer</span>
+        <span class="kn">from</span> <span class="nn">kuebiko.pipeline.scraper.utils</span> <span class="kn">import</span> <span class="n">chrome_scraper</span><span class="p">,</span> <span class="n">get_page</span>
+
+        <span class="n">task_id</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">task_id</span>
+        <span class="n">urls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span>
+        <span class="k">with</span> <span class="n">DriverContainer</span><span class="p">(</span><span class="n">chrome_scraper</span><span class="p">)</span> <span class="k">as</span> <span class="n">driver_container</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_page</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>We could assign <code>data</code> to <code>self.data</code> and get metaflow to
+automatically create an artifact that we can load;
+however when we go to join the artifacts from each fork
+in the next (join) step we run into issues:
+1) If we try and combine all the data into one artifact we
+   will run out of memory
+2) If we process the chunks one-by-one clearing memory as
+   each is done, then we need to stream to S3 which requires
+   an extra dependency (<code>smart-open</code>).
+   If we choose JSON (a sensible default format) then the
+   getter ends up with one big file that it can&rsquo;t stream and
+   likely ends up running out of memory (and you have to hack
+  &lsquo;[&lsquo; and &lsquo;]&rsquo; at the beginning and end of writing).
+   If we choose &hellip;</p>
+<p>Instead we &hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">with</span> <span class="n">S3</span><span class="p">(</span><span class="n">run</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">s3</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;pages-task</span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2">.json&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Very inefficient way of storing the data - if we only wanted
+to analyse the network data we&rsquo;d have to download and load
+into RAM all the page-sources too&hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">s3</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">join</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Store keys corresponding to data from forked tasks.&quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Storing keys means we have to write less logic in the getters
+rather than duplicating logic.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">key</span> <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@step</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;No-op.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">UkBusinessHomepageScrape</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

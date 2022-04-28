@@ -25,7 +25,19 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">toolz</span> <span class="kn">import</span> <span class="n">interleave</span>
 
-<span class="n">LEVELS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;section&quot;</span><span class="p">,</span> <span class="s2">&quot;division&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;subclass&quot;</span><span class="p">]</span></pre></div>
+<span class="n">LEVELS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;section&quot;</span><span class="p">,</span> <span class="s2">&quot;division&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;subclass&quot;</span><span class="p">]</span>
+<span class="n">EXPECTED_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;section_name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;division&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;division_name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;group&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;group_name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;class&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;class_name&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;subclass&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;subclass_name&quot;</span><span class="p">,</span>
+<span class="p">]</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -77,12 +89,50 @@
     </div>
     <div class='code'>
       <div class="highlight"><pre><span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Fill missing information in spreadsheet.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Fill missing information in spreadsheet.</span>
+
+<span class="sd">    Go from:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    [</span>
+<span class="sd">        [&quot;A&quot;, &quot;Agri&quot;, nan, nan, nan, nan, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, &quot;01&quot;, &quot;Crop&quot;, nan, nan, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, &quot;01.1&quot;, &quot;Grow&quot;, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, nan, nan, &quot;01.11&quot;, &quot;Grow&quot;, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, nan, nan, nan, nan, &quot;01.11/xx&quot;, &quot;Extra&quot;],</span>
+<span class="sd">        [nan, nan, nan, nan, nan, nan, &quot;01.12&quot;, &quot;Grow&quot;, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, &quot;01.2&quot;, &quot;Grow&quot;, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, nan, nan, &quot;01.21&quot;, &quot;Grow&quot;, nan, nan],</span>
+<span class="sd">        [nan, nan, &quot;02&quot;, &quot;Forest&quot;, nan, nan, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, &quot;02.1&quot;, &quot;Silvi&quot;, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, nan, nan, &quot;02.10&quot;, &quot;Silvi&quot;, nan, nan],</span>
+<span class="sd">        [&quot;B&quot;, &quot;Mini&quot;, nan, nan, nan, nan, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, &quot;05&quot;, &quot;Mini&quot;, nan, nan, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, NOTE, nan, nan, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, &quot;05.1&quot;, &quot;Mini&quot;, nan, nan, nan, nan],</span>
+<span class="sd">        [nan, nan, nan, nan, nan, nan, &quot;05.10&quot;, &quot;Mini&quot;, nan, nan],</span>
+<span class="sd">    ]</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    To:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    [</span>
+<span class="sd">        [&quot;A&quot;, &quot;Agri&quot;, &quot;01&quot;, &quot;Crop&quot;, &quot;01.1&quot;, &quot;Grow&quot;, &quot;01.11&quot;, &quot;Grow&quot;, &quot;01.11/xx&quot;, &quot;Extra&quot;],</span>
+<span class="sd">        [&quot;A&quot;, &quot;Agri&quot;, &quot;01&quot;, &quot;Crop&quot;, &quot;01.1&quot;, &quot;Grow&quot;, &quot;01.12&quot;, &quot;Grow&quot;, &quot;01.12/0&quot;, &quot;Grow&quot;],</span>
+<span class="sd">        [&quot;A&quot;, &quot;Agri&quot;, &quot;01&quot;, &quot;Crop&quot;, &quot;01.2&quot;, &quot;Grow&quot;, &quot;01.21&quot;, &quot;Grow&quot;, &quot;01.21/0&quot;, &quot;Grow&quot;],</span>
+<span class="sd">        [&quot;A&quot;, &quot;Agri&quot;, &quot;02&quot;, &quot;Forest&quot;, &quot;02.1&quot;, &quot;Silvi&quot;, &quot;02.10&quot;, &quot;Silvi&quot;, &quot;02.10/0&quot;, &quot;Silvi&quot;],</span>
+<span class="sd">        [&quot;B&quot;, &quot;Mini&quot;, &quot;05&quot;, &quot;Mini&quot;, &quot;05.1&quot;, &quot;Mini&quot;, &quot;05.10&quot;, &quot;Mini&quot;, &quot;05.10/0&quot;, &quot;Mini&quot;],</span>
+<span class="sd">    ]</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: B950</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_generic_fill</span><span class="p">,</span> <span class="s2">&quot;section&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_drop_notes</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_generic_fill</span><span class="p">,</span> <span class="s2">&quot;section&quot;</span><span class="p">)</span>
         <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_generic_fill</span><span class="p">,</span> <span class="s2">&quot;division&quot;</span><span class="p">)</span>
         <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_generic_fill</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_subclass_fill</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">_class_subclass_fill</span><span class="p">)[</span><span class="n">EXPECTED_COLUMNS</span><span class="p">]</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="p">)</span></pre></div>
     </div>
   </div>
@@ -135,8 +185,12 @@
       
     </div>
     <div class='code'>
-      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_subclass_fill</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Resolve.&quot;&quot;&quot;</span>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_class_subclass_fill</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Fill class and subclass.</span>
+
+<span class="sd">    More nuanced because subclasses may not exist, therefore have to be</span>
+<span class="sd">    resolved at the same time of class and possible inferred from them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Forward fill classes</span>
     <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;class_name&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;class_name&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">ffill</span><span class="p">()</span>
 
@@ -165,16 +219,37 @@
       
     </div>
     <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_drop_notes</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Drop rows that only have either code or name - they correspond to notes.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
       <div class="highlight"><pre><span class="k">def</span> <span class="nf">_generic_fill</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Ffill columns relating to `col`, dropping rows that were originally not NaN.&quot;&quot;&quot;</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">]</span>
-    <span class="n">subdf</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="c1"># Drop rows that only have either code or name - they correspond to notes</span>
-        <span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">subdf</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Indexes of rows that were originally not NaN (just labels to be propagated)</span>
+    <span class="n">label_idx</span> <span class="o">=</span> <span class="n">subdf</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">subdf</span>
+        <span class="c1"># Forward fill</span>
+        <span class="o">.</span><span class="n">ffill</span><span class="p">()</span>
+        <span class="c1"># Drop rows we don&#39;t need</span>
+        <span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">label_idx</span><span class="p">]</span>
+        <span class="c1"># Join back to rest of columns</span>
+        <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="p">)</span>
-    <span class="n">label_idx</span> <span class="o">=</span> <span class="n">subdf</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">subdf</span><span class="o">.</span><span class="n">ffill</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">label_idx</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
 </pre></div>
     </div>

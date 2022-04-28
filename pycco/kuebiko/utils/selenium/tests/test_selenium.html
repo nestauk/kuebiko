@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>test_selenium.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>test_selenium.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="c1"># from unittest.mock import patch</span>
+
+<span class="c1"># from pytest import raises</span>
+<span class="c1"># from selenium.common.exceptions import (</span>
+<span class="c1">#     InvalidSessionIdException,</span>
+<span class="c1">#     TimeoutException,</span>
+<span class="c1">#     WebDriverException,</span>
+<span class="c1"># )</span>
+<span class="c1"># from urllib3.exceptions import MaxRetryError</span>
+<span class="c1"># from urllib3.util.url import parse_url</span>
+
+<span class="c1"># from kuebiko.utils.selenium import (</span>
+<span class="c1">#     DriverContainer,</span>
+<span class="c1">#     get,</span>
+<span class="c1">#     get_with_retry,</span>
+<span class="c1"># )</span>
+<span class="c1"># from kuebiko.utils.selenium.constants import CHROME_NETWORK_ERRORS</span>
+<span class="c1"># from kuebiko.utils.selenium.error_handling import (</span>
+<span class="c1">#     BrowserCrashError,</span>
+<span class="c1">#     PossibleSchemeError,</span>
+<span class="c1"># )</span>
+
+
+<span class="c1"># @patch(</span>
+<span class="c1">#     &quot;kuebiko.utils.selenium.get_page.get&quot;,</span>
+<span class="c1">#     side_effect=TimeoutException(&quot;Timeout&quot;),</span>
+<span class="c1"># )</span>
+<span class="c1"># def test_get_retry_halts(get_mock):</span>
+<span class="c1">#     driver_container = object</span>
+
+<span class="c1">#     assert get_with_retry(driver_container, &quot;localhost&quot;) is None</span>
+<span class="c1">#     assert get_mock.call_count == 2</span>
+
+<span class="c1">#     get_mock.side_effect = BrowserCrashError(&quot;Crash&quot;)</span>
+<span class="c1">#     get_mock.reset_mock()</span>
+
+<span class="c1">#     assert get_with_retry(driver_container, &quot;localhost&quot;) is None</span>
+<span class="c1">#     assert get_mock.call_count == 2</span>
+
+
+<span class="c1"># def n_errors_then_response(exc, n=1, response=&quot;RESPONSE&quot;):</span>
+<span class="c1">#     for _ in range(n):</span>
+<span class="c1">#         yield exc</span>
+<span class="c1">#     yield response</span>
+
+
+<span class="c1"># @patch(</span>
+<span class="c1">#     &quot;kuebiko.utils.selenium.get_page.get&quot;,</span>
+<span class="c1">#     side_effect=n_errors_then_response(TimeoutException(&quot;Timeout&quot;)),</span>
+<span class="c1"># )</span>
+<span class="c1"># def test_get_retry_on_one_timeout_succeeds(get_mock):</span>
+<span class="c1">#     driver_container = object</span>
+
+<span class="c1">#     assert get_with_retry(driver_container, HTTPS_URL) == &quot;RESPONSE&quot;</span>
+<span class="c1">#     assert get_mock.call_count == 2</span>
+
+
+<span class="c1"># @patch(</span>
+<span class="c1">#     &quot;kuebiko.utils.selenium.get_page.get&quot;,</span>
+<span class="c1">#     side_effect=n_errors_then_response(PossibleSchemeError()),</span>
+<span class="c1"># )</span>
+<span class="c1"># def test_get_retry_on_scheme_error_succeeds(get_mock):</span>
+<span class="c1">#     driver_container = object</span>
+
+<span class="c1">#     assert get_with_retry(driver_container, HTTPS_URL) == &quot;RESPONSE&quot;</span>
+<span class="c1">#     assert get_mock.call_count == 2</span>
+
+
+<span class="c1"># def test_get_timeout():</span>
+<span class="c1">#     driver_container = mock_driver_container()</span>
+<span class="c1">#     driver_container._driver.get.side_effect = TimeoutException(&quot;Timeout&quot;)</span>
+
+<span class="c1">#     with raises(TimeoutException):</span>
+<span class="c1">#         get(driver_container, HTTPS_URL)</span>
+
+
+<span class="c1"># def test_get_webdriverexception():</span>
+<span class="c1">#     driver_container = DriverContainer()  # mock_driver_container()</span>
+
+<span class="c1">#     for _, code in CHROME_NETWORK_ERRORS.items():</span>
+<span class="c1">#         # driver_container._driver.get.side_effect = WebDriverException(msg)</span>
+<span class="c1">#         url = parse_url(f&quot;chrome://network-error/{code}&quot;)</span>
+<span class="c1">#         print(url)</span>
+<span class="c1">#         with raises(PossibleSchemeError):</span>
+<span class="c1">#             get(driver_container, url)</span>
+<span class="c1">#         # assert get(driver_container, HTTP_URL) is None</span>
+
+<span class="c1">#     driver_container = mock_driver_container()</span>
+<span class="c1">#     # TODO: How can we actually trigger these exceptions for real?</span>
+<span class="c1">#     #       If selenium error messages change then tests don&#39;t save us</span>
+<span class="c1">#     # TODO: Does this only apply to chromium?</span>
+<span class="c1">#     driver_container._driver.get.side_effect = TimeoutException()</span>
+<span class="c1">#     with raises(TimeoutException):</span>
+<span class="c1">#         get(driver_container, HTTPS_URL)</span>
+
+<span class="c1">#     driver_container._driver.get.side_effect = InvalidSessionIdException()</span>
+<span class="c1">#     with raises(BrowserCrashError):</span>
+<span class="c1">#         get(driver_container, HTTPS_URL)</span>
+
+<span class="c1">#     driver_container._driver.get.side_effect = WebDriverException(</span>
+<span class="c1">#         &quot;session deleted because of page crash&quot;</span>
+<span class="c1">#     )</span>
+<span class="c1">#     with raises(BrowserCrashError):</span>
+<span class="c1">#         get(driver_container, HTTPS_URL)</span>
+
+<span class="c1">#     driver_container._driver.get.side_effect = WebDriverException(&quot;unknown error&quot;)</span>
+<span class="c1">#     with raises(WebDriverException):</span>
+<span class="c1">#         get(driver_container, HTTPS_URL)</span>
+
+<span class="c1">#     driver_container._driver.get.side_effect = WebDriverException(</span>
+<span class="c1">#         &quot;ERR_NAME_NOT_RESOLVED&quot;</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert get(driver_container, HTTP_URL) is None</span>
+<span class="c1">#     with raises(PossibleSchemeError):</span>
+<span class="c1">#         get(driver_container, HTTPS_URL)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

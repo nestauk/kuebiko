@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>test_get_page.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>test_get_page.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="kn">import</span> <span class="n">Mock</span><span class="p">,</span> <span class="n">patch</span>
+
+<span class="kn">from</span> <span class="nn">pytest</span> <span class="kn">import</span> <span class="n">mark</span><span class="p">,</span> <span class="n">raises</span>
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InvalidSessionIdException</span><span class="p">,</span>
+    <span class="n">TimeoutException</span><span class="p">,</span>
+    <span class="n">WebDriverException</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">kuebiko.utils.selenium</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get</span><span class="p">,</span>
+    <span class="n">get_with_retry</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">kuebiko.utils.selenium.constants</span> <span class="kn">import</span> <span class="n">CHROME_NETWORK_ERRORS</span><span class="p">,</span> <span class="n">DEFAULT_RETRIES</span>
+<span class="kn">from</span> <span class="nn">kuebiko.utils.selenium.error_handling</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BrowserCrashError</span><span class="p">,</span>
+    <span class="n">PossibleSchemeError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">conftest</span> <span class="kn">import</span> <span class="n">n_errors_then_response</span>  <span class="c1"># noqa</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;side_effect&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">TimeoutException</span><span class="p">(</span><span class="s2">&quot;Timeout&quot;</span><span class="p">),</span> <span class="n">BrowserCrashError</span><span class="p">(</span><span class="s2">&quot;Crash&quot;</span><span class="p">)]</span>
+<span class="p">)</span>
+<span class="nd">@patch</span><span class="p">(</span><span class="s2">&quot;kuebiko.utils.selenium.get_page.get&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_get_retry_halts_on_constant_error</span><span class="p">(</span><span class="n">get_mock</span><span class="p">,</span> <span class="n">side_effect</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="n">driver_container</span> <span class="o">=</span> <span class="nb">object</span>
+
+    <span class="n">get_mock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">side_effect</span>
+    <span class="k">assert</span> <span class="n">get_with_retry</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">get_mock</span><span class="o">.</span><span class="n">call_count</span> <span class="o">==</span> <span class="n">DEFAULT_RETRIES</span>
+
+
+<span class="nd">@mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;side_effect&quot;</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="n">n_errors_then_response</span><span class="p">(</span><span class="n">TimeoutException</span><span class="p">(</span><span class="s2">&quot;Timeout&quot;</span><span class="p">),</span> <span class="n">n</span><span class="o">=</span><span class="n">DEFAULT_RETRIES</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">n_errors_then_response</span><span class="p">(</span><span class="n">BrowserCrashError</span><span class="p">(</span><span class="s2">&quot;Crash&quot;</span><span class="p">),</span> <span class="n">n</span><span class="o">=</span><span class="n">DEFAULT_RETRIES</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">n_errors_then_response</span><span class="p">(</span><span class="n">PossibleSchemeError</span><span class="p">(</span><span class="s2">&quot;Scheme&quot;</span><span class="p">),</span> <span class="n">n</span><span class="o">=</span><span class="n">DEFAULT_RETRIES</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="nd">@patch</span><span class="p">(</span>
+    <span class="s2">&quot;kuebiko.utils.selenium.get_page.get&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_get_retry_succeeds_on_transient_error</span><span class="p">(</span><span class="n">get_mock</span><span class="p">,</span> <span class="n">side_effect</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="n">driver_container</span> <span class="o">=</span> <span class="nb">object</span>
+
+    <span class="n">get_mock</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">side_effect</span>
+    <span class="k">assert</span> <span class="n">get_with_retry</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;RESPONSE&quot;</span>
+    <span class="k">assert</span> <span class="n">get_mock</span><span class="o">.</span><span class="n">call_count</span> <span class="o">==</span> <span class="n">DEFAULT_RETRIES</span>
+
+
+<span class="nd">@mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;side_effect, narrowed_exc&quot;</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="n">TimeoutException</span><span class="p">(),</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">BrowserCrashError</span><span class="p">(),</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">PossibleSchemeError</span><span class="p">(),</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span>
+            <span class="n">InvalidSessionIdException</span><span class="p">(),</span>
+            <span class="n">BrowserCrashError</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="p">(</span>
+            <span class="n">WebDriverException</span><span class="p">(</span><span class="s2">&quot;session deleted because of page crash&quot;</span><span class="p">),</span>
+            <span class="n">BrowserCrashError</span><span class="p">(),</span>
+        <span class="p">),</span>
+        <span class="p">(</span><span class="n">WebDriverException</span><span class="p">(),</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_get_raises_error</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">side_effect</span><span class="p">,</span> <span class="n">narrowed_exc</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">side_effect</span>
+
+    <span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">narrowed_exc</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="n">narrowed_exc</span> <span class="k">else</span> <span class="n">side_effect</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+        <span class="n">get</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+
+<span class="nd">@mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;side_effect, narrowed_exc&quot;</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="n">WebDriverException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)),</span> <span class="n">PossibleSchemeError</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">CHROME_NETWORK_ERRORS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_network_error_raises_possibleschemeerror_without_http</span><span class="p">(</span>
+    <span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">side_effect</span><span class="p">,</span> <span class="n">narrowed_exc</span><span class="p">,</span> <span class="n">url</span>
+<span class="p">):</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">side_effect</span>
+
+    <span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">narrowed_exc</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="n">narrowed_exc</span> <span class="k">else</span> <span class="n">side_effect</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+        <span class="n">get</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+
+<span class="nd">@mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;side_effect&quot;</span><span class="p">,</span>
+    <span class="p">[</span><span class="n">WebDriverException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span> <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">CHROME_NETWORK_ERRORS</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_network_error_returns_none_on_http_foo</span><span class="p">(</span>
+    <span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">side_effect</span><span class="p">,</span> <span class="n">http_url</span>
+<span class="p">):</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">side_effect</span>
+    <span class="k">assert</span> <span class="n">get</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">http_url</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">test_get_succeeds_foo</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">driver_container</span><span class="p">):</span>
+    <span class="n">callback</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">side_effect</span><span class="o">=</span><span class="nb">print</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">get</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">get</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+    <span class="n">callback</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

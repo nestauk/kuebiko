@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>error_handling.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>error_handling.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InvalidSessionIdException</span><span class="p">,</span>
+    <span class="n">TimeoutException</span><span class="p">,</span>
+    <span class="n">UnexpectedAlertPresentException</span><span class="p">,</span>
+    <span class="n">WebDriverException</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.webdriver</span> <span class="kn">import</span> <span class="n">WebDriver</span>
+<span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">MaxRetryError</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.url</span> <span class="kn">import</span> <span class="n">Url</span>
+
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">CHROME_NETWORK_ERRORS</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">BrowserCrashError</span><span class="p">,</span> <span class="n">PossibleSchemeError</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">dismiss_alerts</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">is_driver_corrupt</span><span class="p">(</span><span class="n">driver</span><span class="p">:</span> <span class="n">WebDriver</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns True if WebDriver is corrupt (can&#39;t be used to perform new actions).&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">MaxRetryError</span><span class="p">:</span>
+        <span class="c1"># Arises when driver has quit?</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="n">UnexpectedAlertPresentException</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dismiss_alerts</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">BrowserCrashError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="n">WebDriverException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_is_browser_crash</span><span class="p">(</span><span class="n">exc</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">raise</span> <span class="n">exc</span>  <span class="c1"># Unexpected</span>
+
+    <span class="k">return</span> <span class="kc">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_is_browser_crash</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="n">WebDriverException</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns True if `exc` should be narrowed to a `BrowserCrashError`.&quot;&quot;&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">msg</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;session deleted because of page crash&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">exc</span><span class="p">,</span> <span class="n">InvalidSessionIdException</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_is_chrome_network_error</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">([</span><span class="n">msg_</span> <span class="ow">in</span> <span class="p">(</span><span class="n">msg</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">msg_</span> <span class="ow">in</span> <span class="n">CHROME_NETWORK_ERRORS</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_is_scheme_error</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="n">WebDriverException</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Combine small functions to create more complex one</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">_is_chrome_network_error</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span> <span class="ow">and</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">!=</span> <span class="s2">&quot;http&quot;</span> <span class="k">else</span> <span class="kc">False</span>  <span class="c1"># type: ignore # noqa</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_is_timeout_error</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>May seem pointless to wrap this in such a simple function but our
+understanding of a timeout error could change. Encapsulating our domain&rsquo;s
+definition of a timeout error here means we would only need to make
+a change here.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">TimeoutException</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">handle_webdriver_exception</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="n">WebDriverException</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Narrow `WebDriverException` for `url`, to specific exception or return `None`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exc: A WebDriverException raised when trying to reach `url`</span>
+<span class="sd">        url: URL that raised `exc`</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        BrowserCrashError: `exc` narrowed</span>
+<span class="sd">        PossibleSchemeError: `exc` narrowed</span>
+<span class="sd">        TimeoutException: `exc` narrowed</span>
+<span class="sd">        WebDriverException: `exc` wasn&#39;t narrowed to exception we know how to handle.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None if `url` not reachable (non-transient error), e.g. the URL doesn&#39;t exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">_is_browser_crash</span><span class="p">(</span><span class="n">exc</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">BrowserCrashError</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">_is_scheme_error</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">PossibleSchemeError</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">_is_timeout_error</span><span class="p">(</span><span class="n">exc</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">TimeoutException</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">_is_chrome_network_error</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">):</span>
+        <span class="c1"># Non-transient failure</span>
+        <span class="c1"># E.g. &quot;ERR_NAME_NOT_RESOLVED (-105)&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown error pathway @ </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">WebDriverException</span><span class="p">(</span><span class="o">*</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

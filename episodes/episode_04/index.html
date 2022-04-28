@@ -10,14 +10,14 @@
       
       
       
-        <link rel="canonical" href="https://nestauk.github.io/kuebiko/guides/metaflow/">
+        <link rel="canonical" href="https://nestauk.github.io/kuebiko/episodes/episode_04/">
       
       <link rel="icon" href="../../favicon.ico">
       <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.9">
     
     
       
-        <title>Metaflow - ds-cookiecutter guide</title>
+        <title>04 - [Partially complete] - ds-cookiecutter guide</title>
       
     
     
@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#metaflow-guide" class="md-skip">
+        <a href="#4-metaflow-on-aws-batch" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Metaflow
+              04 - [Partially complete]
             
           </span>
         </div>
@@ -260,14 +260,16 @@
 
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
       
       
       
@@ -289,7 +291,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../episodes/">Episodes</a>
+          <a href="../">Episodes</a>
           
             <label for="__nav_3">
               <span class="md-nav__icon md-icon"></span>
@@ -312,7 +314,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../episodes/episode_01/" class="md-nav__link">
+      <a href="../episode_01/" class="md-nav__link">
         01 - Metaflow basics
       </a>
     </li>
@@ -326,7 +328,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../episodes/episode_03/" class="md-nav__link">
+      <a href="../episode_03/" class="md-nav__link">
         03 - [Incomplete]
       </a>
     </li>
@@ -338,11 +340,21 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../episodes/episode_04/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         04 - [Partially complete]
       </a>
+      
     </li>
   
 
@@ -354,7 +366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../episodes/episode_05/" class="md-nav__link">
+      <a href="../episode_05/" class="md-nav__link">
         05 - [Partially complete]
       </a>
     </li>
@@ -374,16 +386,14 @@
 
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" data-md-state="indeterminate" type="checkbox" id="__nav_4" checked>
       
       
       
@@ -408,161 +418,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Metaflow
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../guides/metaflow/" class="md-nav__link">
         Metaflow
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#recap-what-can-metaflow-do-for-you" class="md-nav__link">
-    Recap: What can Metaflow do for you?
-  </a>
-  
-    <nav class="md-nav" aria-label="Recap: What can Metaflow do for you?">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#data-versioning" class="md-nav__link">
-    Data versioning
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#scalable-computing" class="md-nav__link">
-    Scalable computing
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sharing-results" class="md-nav__link">
-    Sharing results
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-you-out-of-dependency-hell" class="md-nav__link">
-    Get you out of dependency hell
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#make-your-pipelines-easier-to-understand" class="md-nav__link">
-    Make your pipelines easier to understand
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#checkpointing" class="md-nav__link">
-    Checkpointing
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#suggested-practices" class="md-nav__link">
-    Suggested practices
-  </a>
-  
-    <nav class="md-nav" aria-label="Suggested practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#writing-flows" class="md-nav__link">
-    Writing flows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#workflow" class="md-nav__link">
-    Workflow
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#things-to-watch-out-for" class="md-nav__link">
-    Things to watch out for
-  </a>
-  
-    <nav class="md-nav" aria-label="Things to watch out for">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gotchas" class="md-nav__link">
-    Gotchas
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bugs" class="md-nav__link">
-    Bugs
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#poor-errors" class="md-nav__link">
-    Poor errors
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -609,130 +469,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#recap-what-can-metaflow-do-for-you" class="md-nav__link">
-    Recap: What can Metaflow do for you?
-  </a>
-  
-    <nav class="md-nav" aria-label="Recap: What can Metaflow do for you?">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#data-versioning" class="md-nav__link">
-    Data versioning
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#scalable-computing" class="md-nav__link">
-    Scalable computing
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sharing-results" class="md-nav__link">
-    Sharing results
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-you-out-of-dependency-hell" class="md-nav__link">
-    Get you out of dependency hell
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#make-your-pipelines-easier-to-understand" class="md-nav__link">
-    Make your pipelines easier to understand
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#checkpointing" class="md-nav__link">
-    Checkpointing
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#suggested-practices" class="md-nav__link">
-    Suggested practices
-  </a>
-  
-    <nav class="md-nav" aria-label="Suggested practices">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#writing-flows" class="md-nav__link">
-    Writing flows
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#workflow" class="md-nav__link">
-    Workflow
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#things-to-watch-out-for" class="md-nav__link">
-    Things to watch out for
-  </a>
-  
-    <nav class="md-nav" aria-label="Things to watch out for">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gotchas" class="md-nav__link">
-    Gotchas
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bugs" class="md-nav__link">
-    Bugs
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#poor-errors" class="md-nav__link">
-    Poor errors
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -743,129 +479,72 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/nestauk/kuebiko/edit/master/docs/guide/guides/metaflow.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/nestauk/kuebiko/edit/master/docs/guide/episodes/episode_04.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="metaflow-guide">Metaflow Guide<a class="headerlink" href="#metaflow-guide" title="Permanent link">&para;</a></h1>
-<h2 id="recap-what-can-metaflow-do-for-you">Recap: What can Metaflow do for you?<a class="headerlink" href="#recap-what-can-metaflow-do-for-you" title="Permanent link">&para;</a></h2>
-<h3 id="data-versioning">Data versioning<a class="headerlink" href="#data-versioning" title="Permanent link">&para;</a></h3>
-<p>Each execution of a Flow has a unique run ID which data artifacts are stored under.</p>
-<p>The artifacts and metadata of each run can be fetched using the <a href="https://docs.metaflow.org/metaflow/client">Metaflow client API</a>.</p>
-<h3 id="scalable-computing">Scalable computing<a class="headerlink" href="#scalable-computing" title="Permanent link">&para;</a></h3>
-<p>Metaflow abstracts infrastructure making horizontally and vertically scalable cloud computing easily available to Data Scientists.</p>
-<p>In some (not all) cases it's as easy as adding <code>--with batch</code> to the end of the command to run a flow!</p>
-<h3 id="sharing-results">Sharing results<a class="headerlink" href="#sharing-results" title="Permanent link">&para;</a></h3>
-<p>Data artifacts of runs can be stored and versioned not only on your machine but also to AWS S3, meaning you can share your results easily.</p>
-<h3 id="get-you-out-of-dependency-hell">Get you out of dependency hell<a class="headerlink" href="#get-you-out-of-dependency-hell" title="Permanent link">&para;</a></h3>
-<p>Ever run into a situation where one part of a project needs a package that conflicts with another?</p>
-<p>Metaflow allows you to <a href="https://docs.metaflow.org/metaflow/dependencies">specify dependencies at the flow level</a> and automatically builds a Conda environment and runs your flow in it.</p>
-<h3 id="make-your-pipelines-easier-to-understand">Make your pipelines easier to understand<a class="headerlink" href="#make-your-pipelines-easier-to-understand" title="Permanent link">&para;</a></h3>
-<p>Expressing a script as a DAG instead makes things a lot easier to understand.</p>
-<p>Metaflow also has commands such as <code>show</code> and <code>output-dot</code> which visualise this structure.</p>
-<h3 id="checkpointing">Checkpointing<a class="headerlink" href="#checkpointing" title="Permanent link">&para;</a></h3>
-<p>It's annoying when your code has gotten halfway through a pipeline only to tail.</p>
-<p>Metaflow automatically checkpoints the steps of your flow and lets you <code>resume</code> a run after fixing any issues, saving you having to re-run the whole pipeline or maintain your own checkpointing logic (that may be fraught with conflicts between different run parameters).</p>
-<h2 id="suggested-practices">Suggested practices<a class="headerlink" href="#suggested-practices" title="Permanent link">&para;</a></h2>
-<h3 id="writing-flows">Writing flows<a class="headerlink" href="#writing-flows" title="Permanent link">&para;</a></h3>
+<h1 id="4-metaflow-on-aws-batch">4. Metaflow on AWS batch<a class="headerlink" href="#4-metaflow-on-aws-batch" title="Permanent link">&para;</a></h1>
+<p><img alt="⚠" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/26a0.svg" title=":warning:" /> <strong>This episode is partially complete</strong> <img alt="⚠" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/26a0.svg" title=":warning:" /></p>
+<p>Takes the scraping utilities developed in <a href="../episode_03/">Episode 3</a> and wraps them in a Metaflow flow that starts many concurrent Batch jobs running our scraper allowing it to scale to hundreds of thousands of websites.</p>
+<p>It also introduces the <a href="https://github.com/nestauk/metaflow_extensions"><code>metaflow_extensions</code></a> library which provides a <code>@pip</code> decorator which allows easy installation of pip dependencies. This is useful because it allows us to use the scraping utilities (in <code>kuebiko/utils/*</code>) on AWS Batch and/or within a Conda environment.</p>
 <ul>
-<li><strong>Naming a flow</strong><ul>
-<li>No need to add <code>Flow</code> as a suffix, the directory structure should speak to that</li>
-<li>Don't make names too generic, e.g. if the flow trains a topic model on Arxiv paper abstracts then call it something like <code>ArxivAbstractTopicModel</code> rather than just <code>TopicModel</code></li>
+<li><code>kuebiko/pipeline/scraper/flow.py</code> defines the flow</li>
+<li><code>kuebiko/pipeline/scraper/utils.py</code> contains related utility functions:<ul>
+<li><code>chrome_scraper</code> - Define a Selenium Chrome <code>WebDriver</code> instance specific to scraping and performance benchmarking websites - this gets injected into the scraper utilities</li>
+<li><code>get_page</code> - Simple wrapper around the scraper utilities to:<ul>
+<li>Perform callback actions we want to occur when the scraper GETs a page</li>
+<li>Extract and return network and page source data</li>
 </ul>
 </li>
-<li>
-<p><strong>Add a test mode</strong></p>
-<p>If your flow takes more than a minute or two to run then you should always add a parameter <code>test_mode = Parameter("test-mode", ...)</code> (by convention) which will run your flow in a test mode that runs quickly, e.g. fetch/run a subset of the data.
-This facilitates both efficient code review (a reviewer can check the test mode runs successfully without having to wait hours/days for the full flow to run) and automated testing.</p>
-<p>We recommend that by default <code>self.test_mode</code> is either:</p>
+<li><code>page_stats</code> - Processes network data into appropriate summary statistics</li>
+</ul>
+</li>
+</ul>
+<p>We can run the flow with the command...</p>
+<div class="highlight"><pre><span></span><code>python kuebiko/pipeline/scraper/flow.py<span class="se">\</span>
+ --datastore s3<span class="se">\</span>
+ --metadata service<span class="se">\</span>
+ --environment<span class="o">=</span>conda<span class="se">\</span>
+ --package-suffixes .py,.md,.txt<span class="se">\</span>
+ run<span class="se">\</span>
+ --url-list inputs/data/websites.csv<span class="se">\</span>
+ --with <span class="s2">&quot;batch:image=pyselenium&quot;</span>
+</code></pre></div>
+<p>where:</p>
 <ul>
-<li>The logical not of <code>current.is_production</code> (<code>default=lambda _: not current.is_production</code>)</li>
-<li><code>True</code></li>
-</ul>
-<p>If a flow is run with <code>--production</code> (<code>current.is_production</code> is <code>True</code>) then test mode functionality should not be activated!
-Whilst often the logical not of one another, <code>self.test_mode</code> and <code>current.is_production</code> are two different concepts - <code>self.test_mode</code> and <code>current.is_production</code> may both be <code>False</code> when a user wants to run a flow without affecting
-other users.</p>
-</li>
-<li>
-<p>The only class/function in a flow file should be the Flow itself</p>
-</li>
-<li>Flows should use the <code>@project</code> decorator (see <a href="#workflow">workflow</a>) using a consistent <code>name</code> parameter throughout the project</li>
-<li>Flow steps should be as minimal as possible containing:<ul>
-<li>Setup such as parsing and logging parameters or declaring context managers</li>
-<li>At most a few high-level function calls</li>
-<li>Any flow-level logic - e.g. merging artifacts</li>
+<li><code>--with: "batch:image=pyselenium"</code> will run our flow steps on batch with the <code>pyselenium</code> image, which is a Docker image that will work with Python, Selenium, and Chrome and is hosted in Nesta's AWS ECR account<ul>
+<li>alternatively to building, deploying, and maintaining a Docker image you could check out <a href="https://github.com/nestauk/metaflow_extensions#i-want-to-install-something-on-a-batch-machine-that-isnt-available-via-pip-or-conda-but-i-dont-want-to-build-and-maintain-my-own-docker-image"><code>metaflow_extensions</code>' <code>preinstall</code> environment</a></li>
+<li>the purpose of this episode is not to teach anything to do with Docker but the Dockerfile and a simple script to deploy to ECR can be found at <code>kuebiko/pipeline/scraper/{Dockerfile,build_deploy_docker.sh}</code></li>
 </ul>
 </li>
-<li>Consider using type-annotations for the data artifacts</li>
-<li>
-<p>Imports used within a step should always go within a step (at the top of it)</p>
-<p>Because metaflow has the ability to abstract infrastructure then
-different steps may run on different machines with different environments.
-<code>from kuebiko.pipeline.sic.utils import *</code> wouldn't work in a step - <code>kuebiko</code>
-isn't installed/packaged in the new conda environment.</p>
+<li><code>--package-suffixes ...</code> determines what file extensions get packaged up into batch jobs<ul>
+<li><code>.py</code> for our code</li>
+<li><code>.md</code> because <code>setup.py</code> requires <code>README.md</code></li>
+<li><code>.txt</code> to include any <code>requirements*.txt</code> files</li>
+</ul>
 </li>
-<li>
-<p>Avoiding saving data artifacts as dataframes (or other library-specific classes) favouring standard Python data-structures instead.</p>
-<p>Python data-structures do not impose the Pandas dependency on the
-downstream consumer of the data who may be working in an environment
-where Pandas isn't available (e.g. AWS lambda) or may have a
-different version of Pandas which when your artifact is loaded
-may subtly differ or fail to load.
-If dataframes are persisted as regular Python data-structure, the
-downstream consumer can still generate a dataframe if they want.</p>
-</li>
-<li>
-<p>When data is too large to be saved as a data artifact (not enough RAM or pickling/unpickling is inefficient) ... TODO</p>
-</li>
-<li>
-<p>Docstrings for steps:</p>
+</ul>
+<p>If we were doing a production run for all 100K sites we would do something like...</p>
+<div class="highlight"><pre><span></span><code>python kuebiko/pipeline/scraper/flow.py<span class="se">\</span>
+ --datastore s3<span class="se">\</span>
+ --metadata service<span class="se">\</span>
+ --environment<span class="o">=</span>conda<span class="se">\</span>
+ --package-suffixes .py,.md,.txt<span class="se">\</span>
+ --production<span class="se">\</span>
+ run<span class="se">\</span>
+ --url-list inputs/data/websites.csv<span class="se">\</span>
+ --with <span class="s2">&quot;batch:image=pyselenium&quot;</span><span class="se">\</span>
+ --max-workers <span class="m">34</span><span class="se">\</span>
+ --max-num-splits <span class="m">150</span>
+</code></pre></div>
+<p>where:</p>
 <ul>
-<li>Always for <code>start</code> and <code>end</code> - their name cannot convey any information about what the step does</li>
-<li>For any step whose name cannot convey the essence of the step or for complex steps (steps that are more than one or two well documented function calls)</li>
+<li><code>--max-workers 34</code> means we can have <code>34</code> metaflow tasks running at once - for this flow it means we'll have up to <code>34</code> AWS batch jobs concurrently scraping websites</li>
+<li><code>--max-num-splits 150</code> increases the number of "splits" a <code>foreach</code> step can contain. The default is <code>100</code> (to protect against accidentally creating a large number of jobs) but we end up with <code>101</code> so we increase this.</li>
 </ul>
-</li>
-</ul>
-<h3 id="workflow">Workflow<a class="headerlink" href="#workflow" title="Permanent link">&para;</a></h3>
-<ul>
-<li>
-<p>Use <code>local</code> datastore during development</p>
-<p>Either pass <code>--datastore=local</code> when running a flow or add <code>METAFLOW_DEFAULT_DATASTORE=local</code> to <code>.envrc</code> to change the default datastore.</p>
-<p>This reduces the overhead to run a flow but means the results are local to your machine (the metadata of the run is still stored in an AWS RDS instance).</p>
-</li>
-<li>
-<p>Use <code>datastore=s3</code> with <code>--production</code> to run your flow such that the artifacts can be seen by another user.</p>
-</li>
-<li>Use the namespace relating to your <code>@project</code> name, e.g. if you're using <code>@project(name="kuebiko")</code> for your flows, use <code>metaflow.namespace("project:kuebiko")</code><ul>
-<li>Setting that in <code>kuebiko/__init__.py</code> means it gets set whenever you use a getter</li>
-</ul>
-</li>
-<li>Using <code>--metadata service</code> (the default) means that your flow metadata will be visible via. the Metaflow UI at https://dap-tools.uk (more information will be available if using the S3 datastore too)!</li>
-</ul>
-<h2 id="things-to-watch-out-for">Things to watch out for<a class="headerlink" href="#things-to-watch-out-for" title="Permanent link">&para;</a></h2>
-<h3 id="gotchas">Gotchas<a class="headerlink" href="#gotchas" title="Permanent link">&para;</a></h3>
-<ul>
-<li>You cannot save functions as data artifacts, they get ignored. You can however save data artifacts with functions inside, e.g. <code>self.artifacts = {"key": lambda _: "value"}</code></li>
-</ul>
-<h3 id="bugs">Bugs<a class="headerlink" href="#bugs" title="Permanent link">&para;</a></h3>
-<p>Here are a bugs you may encounter:</p>
-<ul>
-<li>Using <code>resume</code> on a failed flow that uses <code>metaflow.S3</code> may fail/be inconsistent<ul>
-<li>https://github.com/Netflix/metaflow/issues/664</li>
-</ul>
-</li>
-<li>Metaflow's Conda decorators don't work with Python 3.9<ul>
-<li>https://github.com/Netflix/metaflow/issues/399</li>
-</ul>
-</li>
-</ul>
-<h3 id="poor-errors">Poor errors<a class="headerlink" href="#poor-errors" title="Permanent link">&para;</a></h3>
-<p>Here are errors you may encounter which are uninformative:</p>
-<ul>
-<li><code>TypeError: Can't mix strings and bytes in path components</code> - Use of <code>metaflow.S3</code> with an incorrect metaflow profile</li>
-</ul>
+<p><img alt="🔥" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f525.svg" title=":flame:" /> Check out the <a href="https://dap-tools.uk/UkBusinessHomepageScrape/3604">results</a> in the Metaflow UI <img alt="🧮" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f9ee.svg" title=":abacus:" /></p>
 
               
             </article>
@@ -884,7 +563,7 @@ downstream consumer can still generate a dataframe if they want.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../../episodes/episode_05/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 05 - [Partially complete]" rel="prev">
+        <a href="../episode_03/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 03 - [Incomplete]" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -893,20 +572,20 @@ downstream consumer can still generate a dataframe if they want.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              05 - [Partially complete]
+              03 - [Incomplete]
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../glossary/" class="md-footer__link md-footer__link--next" aria-label="Next: Glossary" rel="next">
+        <a href="../episode_05/" class="md-footer__link md-footer__link--next" aria-label="Next: 05 - [Partially complete]" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Glossary
+              05 - [Partially complete]
             </div>
           </div>
           <div class="md-footer__button md-icon">

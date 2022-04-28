@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>test_companies_house.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>test_companies_house.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="kn">from</span> <span class="nn">kuebiko.pipeline.companies_house.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">process_address</span><span class="p">,</span>
+    <span class="n">process_organisations</span><span class="p">,</span>
+    <span class="n">process_sectors</span><span class="p">,</span>
+<span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">raw_df</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;company_name&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Foo&quot;</span><span class="p">,</span> <span class="s2">&quot;bar&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;company_number&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;SC12&quot;</span><span class="p">,</span> <span class="s2">&quot;13&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;http://foo&quot;</span><span class="p">,</span> <span class="s2">&quot;http://bar&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;address_careof&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;Baz&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;address_pobox&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;*DEFAULT*&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;address_line1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;58 VE&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;address_line2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;address_postcode&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;SE15 7UF&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;address_town&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;London&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;address_county&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Londonshire&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;address_country&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;United Kingdom&quot;</span><span class="p">,</span> <span class="s2">&quot;Engerrrland&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;company_category&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Private Limited Company&quot;</span><span class="p">,</span> <span class="s2">&quot;Limited Partnership&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;company_status&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Active&quot;</span><span class="p">,</span> <span class="s2">&quot;Liquidation&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;country_of_origin&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;United Kingdom&quot;</span><span class="p">,</span> <span class="s2">&quot;Engerrrland&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;dissolution_date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;incorporation_date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;01/08/1981&quot;</span><span class="p">,</span> <span class="s2">&quot;14/05/2021&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;sic_1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;68209 - something&quot;</span><span class="p">,</span> <span class="s2">&quot;99999 - all nines&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;sic_2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;77777 - mostly nan&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;sic_3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+            <span class="s2">&quot;sic_4&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_process_organisations</span><span class="p">(</span><span class="n">raw_df</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">process_organisations</span><span class="p">(</span><span class="n">raw_df</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;company_number&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_process_address</span><span class="p">(</span><span class="n">raw_df</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">process_address</span><span class="p">(</span><span class="n">raw_df</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;address&quot;</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;company_number&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_process_sectors</span><span class="p">(</span><span class="n">raw_df</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">process_sectors</span><span class="p">(</span><span class="n">raw_df</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;company_number&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_process_sectors_extraction</span><span class="p">(</span><span class="n">raw_df</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">process_sectors</span><span class="p">(</span><span class="n">raw_df</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">SIC5_code</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;68209&quot;</span><span class="p">,</span> <span class="s2">&quot;77777&quot;</span><span class="p">,</span> <span class="s2">&quot;99999&quot;</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">SIC4_code</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;6820&quot;</span><span class="p">,</span> <span class="s2">&quot;7777&quot;</span><span class="p">,</span> <span class="s2">&quot;9999&quot;</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>Testing <code>read_companies_house_chunk</code> could be considered overkill, given:
+our project is not a production system; the level of mocking required to
+test it; and that we have a flow-level test that should fail if anything
+were wrong with <code>read_companies_house_chunk</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

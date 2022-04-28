@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>conftest.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>conftest.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">expected_columns</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="s2">&quot;section&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;section_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;division&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;division_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;group&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;group_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;class&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;class_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;subclass&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;subclass_name&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">raw_df</span><span class="p">(</span><span class="n">expected_columns</span><span class="p">):</span>
+    <span class="n">NOTE</span> <span class="o">=</span> <span class="s2">&quot;Notes in the middle of data are amateur hour stuff&quot;</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;Agri&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="s2">&quot;Crop&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01.11&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01.11/xx&quot;</span><span class="p">,</span> <span class="s2">&quot;Extra&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01.12&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01.2&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;01.21&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;02&quot;</span><span class="p">,</span> <span class="s2">&quot;Forest&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;02.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Silvi&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;02.10&quot;</span><span class="p">,</span> <span class="s2">&quot;Silvi&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;05&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">NOTE</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;05.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;05.10&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">expected_columns</span><span class="p">)</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">clean_df</span><span class="p">(</span><span class="n">expected_columns</span><span class="p">):</span>
+    <span class="c1"># fmt: off</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;Agri&quot;</span><span class="p">,</span> <span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="s2">&quot;Crop&quot;</span><span class="p">,</span> <span class="s2">&quot;01.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="s2">&quot;01.11&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="s2">&quot;01.11/xx&quot;</span><span class="p">,</span> <span class="s2">&quot;Extra&quot;</span><span class="p">],</span>  <span class="c1"># noqa: B950</span>
+        <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;Agri&quot;</span><span class="p">,</span> <span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="s2">&quot;Crop&quot;</span><span class="p">,</span> <span class="s2">&quot;01.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="s2">&quot;01.12&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="s2">&quot;01.12/0&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;Agri&quot;</span><span class="p">,</span> <span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="s2">&quot;Crop&quot;</span><span class="p">,</span> <span class="s2">&quot;01.2&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="s2">&quot;01.21&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">,</span> <span class="s2">&quot;01.21/0&quot;</span><span class="p">,</span> <span class="s2">&quot;Grow&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;Agri&quot;</span><span class="p">,</span> <span class="s2">&quot;02&quot;</span><span class="p">,</span> <span class="s2">&quot;Forest&quot;</span><span class="p">,</span> <span class="s2">&quot;02.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Silvi&quot;</span><span class="p">,</span> <span class="s2">&quot;02.10&quot;</span><span class="p">,</span> <span class="s2">&quot;Silvi&quot;</span><span class="p">,</span> <span class="s2">&quot;02.10/0&quot;</span><span class="p">,</span> <span class="s2">&quot;Silvi&quot;</span><span class="p">],</span>  <span class="c1"># noqa: B950</span>
+        <span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="s2">&quot;05&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="s2">&quot;05.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="s2">&quot;05.10&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">,</span> <span class="s2">&quot;05.10/0&quot;</span><span class="p">,</span> <span class="s2">&quot;Mini&quot;</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="c1"># fmt: on</span>
+    <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">expected_columns</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

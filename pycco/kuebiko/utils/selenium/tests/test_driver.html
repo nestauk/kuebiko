@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>test_driver.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>test_driver.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pytest</span> <span class="kn">import</span> <span class="n">mark</span><span class="p">,</span> <span class="n">raises</span>
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InvalidSessionIdException</span><span class="p">,</span>
+    <span class="n">UnexpectedAlertPresentException</span><span class="p">,</span>
+    <span class="n">WebDriverException</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">MaxRetryError</span>
+
+<span class="kn">from</span> <span class="nn">kuebiko.utils.selenium</span> <span class="kn">import</span> <span class="n">DriverContainer</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">test_dunder_exit_quits_driver</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">DriverContainer</span><span class="p">()</span> <span class="k">as</span> <span class="n">driver_container</span><span class="p">:</span>
+        <span class="n">driver_process</span> <span class="o">=</span> <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">process</span>
+        <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">MaxRetryError</span><span class="p">):</span>
+        <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">driver_process</span><span class="o">.</span><span class="n">returncode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Process not terminated&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">test_call_gives_blank_page</span><span class="p">(</span><span class="n">driver_container</span><span class="p">):</span>
+    <span class="n">nonempty_content</span> <span class="o">=</span> <span class="s2">&quot;data:text/html;,I have a body&quot;</span>
+    <span class="n">blank_page</span> <span class="o">=</span> <span class="s2">&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>
+
+    <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nonempty_content</span><span class="p">)</span>
+    <span class="n">driver_container</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">page_source</span> <span class="o">==</span> <span class="n">blank_page</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">test_restart_driver_allows_get</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">crash_url</span><span class="p">):</span>
+    <span class="n">crash_url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">crash_url</span><span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="c1"># with DriverContainer() as driver_container:</span>
+    <span class="c1"># Crash browser</span>
+    <span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">WebDriverException</span><span class="p">):</span>
+        <span class="n">driver_container</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">crash_url</span><span class="p">)</span>
+    <span class="c1"># Vanilla get (no restart) fails</span>
+    <span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">WebDriverException</span><span class="p">):</span>
+        <span class="n">driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="c1"># Wrapped get succeeds</span>
+    <span class="n">driver_container</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;side_effect&quot;</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="n">MaxRetryError</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="n">InvalidSessionIdException</span><span class="p">(),</span>
+        <span class="n">WebDriverException</span><span class="p">(</span><span class="s2">&quot;session deleted because of page crash&quot;</span><span class="p">),</span>
+        <span class="n">UnexpectedAlertPresentException</span><span class="p">(),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_restart_driver_called_if_corrupt</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">,</span> <span class="n">side_effect</span><span class="p">):</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">execute_script</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">side_effect</span>
+    <span class="n">mock_driver_container</span><span class="p">()</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">restart_driver</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">test_restart_driver_not_called_if_not_corrupt</span><span class="p">(</span><span class="n">mock_driver_container</span><span class="p">):</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">execute_script</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">WebDriverException</span><span class="p">(</span>
+        <span class="s2">&quot;any old message&quot;</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">raises</span><span class="p">(</span><span class="n">WebDriverException</span><span class="p">):</span>
+        <span class="n">mock_driver_container</span><span class="p">()</span>
+        <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">restart_driver</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
+
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">execute_script</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">UnexpectedAlertPresentException</span><span class="p">(),</span>
+        <span class="kc">None</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">mock_driver_container</span><span class="p">()</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">restart_driver</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
+
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">_driver</span><span class="o">.</span><span class="n">execute_script</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mock_driver_container</span><span class="p">()</span>
+    <span class="n">mock_driver_container</span><span class="o">.</span><span class="n">restart_driver</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>__init__.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>__init__.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Utilities for web scraping with Chrome+Selenium in a more robust manner.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">.driver</span> <span class="kn">import</span> <span class="n">chrome_driver</span><span class="p">,</span> <span class="n">DriverContainer</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">BrowserCrashError</span><span class="p">,</span> <span class="n">PossibleSchemeError</span>
+<span class="kn">from</span> <span class="nn">.get_page</span> <span class="kn">import</span> <span class="n">get</span><span class="p">,</span> <span class="n">get_with_retry</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">dismiss_alerts</span><span class="p">,</span> <span class="n">get_network_data</span><span class="p">,</span> <span class="n">wait_for_readystate_complete</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>This explicitly defines our public API</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;BrowserCrashError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PossibleSchemeError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_with_retry&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DriverContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;chrome_driver&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dismiss_alerts&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_network_data&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wait_for_readystate_complete&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># TODO: can bits be simplified by using</span>
+<span class="c1"># https://selenium-python.readthedocs.io/api.html#module-selenium.webdriver.support.abstract_event_listener  # noqa: B950</span>
+<span class="c1"># ?</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

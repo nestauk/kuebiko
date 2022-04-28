@@ -190,7 +190,12 @@ you can split or merge existing steps accordingly.</p>
 <span class="sd">        Make implicit entries explicit at row-level (fill), normalise SIC</span>
 <span class="sd">        codes, and add extra codes specific to Companies House.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">companies_house_extras</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">normalise_codes</span></pre></div>
+        <span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">companies_house_extras</span><span class="p">,</span>
+            <span class="n">EXPECTED_COLUMNS</span><span class="p">,</span>
+            <span class="n">fill</span><span class="p">,</span>
+            <span class="n">normalise_codes</span><span class="p">,</span>
+        <span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -218,6 +223,7 @@ readability and transparency of these transformation functions.</p>
             <span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">companies_house_extras</span><span class="p">())</span>
         <span class="p">)</span>
 
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">==</span> <span class="n">EXPECTED_COLUMNS</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></pre></div>
     </div>
   </div>

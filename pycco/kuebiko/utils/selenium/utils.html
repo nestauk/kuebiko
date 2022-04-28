@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>utils.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>utils.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">UnexpectedAlertPresentException</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.webdriver</span> <span class="kn">import</span> <span class="n">WebDriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.support.wait</span> <span class="kn">import</span> <span class="n">WebDriverWait</span>
+<span class="kn">from</span> <span class="nn">tenacity</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">retry</span><span class="p">,</span>
+    <span class="n">retry_if_exception_type</span><span class="p">,</span>
+    <span class="n">RetryCallState</span><span class="p">,</span>
+    <span class="n">stop_after_attempt</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">DEFAULT_TIMEOUT</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">BrowserCrashError</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_raise_exception_on_call</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return function that when called will raise `exc`.&quot;&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">delayed</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">RetryCallState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exc</span>
+
+    <span class="k">return</span> <span class="n">delayed</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@retry</span><span class="p">(</span>
+    <span class="n">stop</span><span class="o">=</span><span class="n">stop_after_attempt</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">retry</span><span class="o">=</span><span class="n">retry_if_exception_type</span><span class="p">(</span><span class="n">UnexpectedAlertPresentException</span><span class="p">),</span>
+    <span class="n">retry_error_callback</span><span class="o">=</span><span class="n">_raise_exception_on_call</span><span class="p">(</span><span class="n">BrowserCrashError</span><span class="p">(</span><span class="s2">&quot;alert bomb&quot;</span><span class="p">)),</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">dismiss_alerts</span><span class="p">(</span><span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebDriver</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebDriver</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Unexpected alerts prevent us extracting data, protect against it.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">driver</span><span class="p">:</span>  <span class="c1"># pragma: nocover</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># current_url</span>
+    <span class="k">except</span> <span class="n">UnexpectedAlertPresentException</span><span class="p">:</span>
+        <span class="c1"># Triggered Exception dismisses ONE alert for us</span>
+        <span class="c1"># Try again (more alerts triggers retry behaviour)</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># current_url</span>
+
+    <span class="k">return</span> <span class="n">driver</span>
+
+
+<span class="k">def</span> <span class="nf">get_network_data</span><span class="p">(</span><span class="n">driver</span><span class="p">:</span> <span class="n">WebDriver</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>  <span class="c1"># TODO</span>
+    <span class="sd">&quot;&quot;&quot;Get `window.performance` network data from `driver`.&quot;&quot;&quot;</span>
+    <span class="n">navigation</span><span class="p">,</span> <span class="n">paint</span><span class="p">,</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        const performance = (</span>
+<span class="sd">            window.performance ||</span>
+<span class="sd">            window.mozPerformance ||</span>
+<span class="sd">            window.msPerformance ||</span>
+<span class="sd">            window.webkitPerformance ||</span>
+<span class="sd">            {});</span>
+<span class="sd">        const paint = performance.getEntriesByType(&quot;paint&quot;) || {}</span>
+<span class="sd">        const resource = performance.getEntriesByType(&quot;resource&quot;) || {}</span>
+<span class="sd">        const navigation = performance.getEntriesByType(&quot;navigation&quot;) || {}</span>
+<span class="sd">        return [navigation, paint, resource];</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">navigation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">paint</span><span class="p">,</span> <span class="n">resource</span>
+
+
+<span class="k">def</span> <span class="nf">wait_for_readystate_complete</span><span class="p">(</span>
+    <span class="n">driver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebDriver</span><span class="p">],</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_TIMEOUT</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebDriver</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Wait `timeout` seconds for `driver` document ready state to be &quot;complete&quot;.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">driver</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Wait up to `timeout` seconds for document readystate to be &quot;complete&quot;</span>
+    <span class="n">WebDriverWait</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span><span class="o">.</span><span class="n">until</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">driver</span><span class="p">:</span> <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;return document.readyState&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;complete&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">driver</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

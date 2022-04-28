@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>url.py</title>
+  <link rel="stylesheet" href="../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>url.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Utilities for parsing, constructing, and manipulating URL&#39;s.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">toolz.curried</span> <span class="k">as</span> <span class="nn">t</span>
+<span class="kn">from</span> <span class="nn">icontract</span> <span class="kn">import</span> <span class="n">ensure</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.url</span> <span class="kn">import</span> <span class="n">Url</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Functions here are short and clear, taking and returning well defined
+objects (<code>Url</code> or <code>bool</code>). One-line docstrings and type-hints are sufficient.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>By running this function with the <code>ensure</code> &ldquo;contract&rdquo; we are automatically
+testing this function.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@ensure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">url</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="s2">&quot;http&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">use_http</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Url</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Swap use of https to http.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;http&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Defining a &ldquo;contract&rdquo; for the remaining functions doesn&rsquo;t give much
+benefit as it would duplicate the logic of the function body</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@ensure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">url</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">or</span> <span class="s2">&quot;http&quot;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">default_to_http</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Url</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;If `url` lacks `scheme` set to &#39;http&#39;.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;http&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>We don&rsquo;t need to return a copy here because <code>Url</code>s are immutable.
+If they were, we should return <code>copy.copy(url)</code></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">url</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@ensure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">url</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">or</span> <span class="s2">&quot;https&quot;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">default_to_https</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Url</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;If `url` lacks `scheme` set to &#39;https&#39;.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">url</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;https&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>We don&rsquo;t need to return a copy here because <code>Url</code>s are immutable.
+If they were, we should return <code>copy.copy(url)</code></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">url</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@t</span><span class="o">.</span><span class="n">curry</span>  <span class="c1"># TODO: remove currying</span>
+<span class="k">def</span> <span class="nf">is_internal_link</span><span class="p">(</span><span class="n">url1</span><span class="p">:</span> <span class="n">Url</span><span class="p">,</span> <span class="n">url2</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Checks if `url1` has the same host as `url2` or has a relative path (no host).&quot;&quot;&quot;</span>
+    <span class="n">locations_match</span> <span class="o">=</span> <span class="n">url1</span><span class="o">.</span><span class="n">host</span> <span class="o">==</span> <span class="n">url2</span><span class="o">.</span><span class="n">host</span>
+    <span class="n">relative_link</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">url1</span><span class="o">.</span><span class="n">host</span> <span class="ow">and</span> <span class="n">url1</span><span class="o">.</span><span class="n">path</span>
+    <span class="k">return</span> <span class="n">locations_match</span> <span class="ow">or</span> <span class="n">relative_link</span>
+
+
+<span class="nd">@t</span><span class="o">.</span><span class="n">curry</span>  <span class="c1"># TODO: remove currying</span>
+<span class="k">def</span> <span class="nf">resolve_link</span><span class="p">(</span><span class="n">link</span><span class="p">:</span> <span class="n">Url</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Url</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;If `link` lacks `host` or `scheme` get them from `other`.&quot;&quot;&quot;</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">host</span> <span class="ow">or</span> <span class="n">other</span><span class="o">.</span><span class="n">host</span>
+    <span class="n">scheme</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">or</span> <span class="n">other</span><span class="o">.</span><span class="n">scheme</span>
+    <span class="k">return</span> <span class="n">link</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="o">=</span><span class="n">scheme</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

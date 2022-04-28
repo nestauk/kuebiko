@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>get_page.py</title>
+  <link rel="stylesheet" href="../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>get_page.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TimeoutException</span><span class="p">,</span>
+    <span class="n">WebDriverException</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.webdriver</span> <span class="kn">import</span> <span class="n">WebDriver</span>
+<span class="kn">from</span> <span class="nn">tenacity</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">retry</span><span class="p">,</span>
+    <span class="n">retry_if_exception_type</span><span class="p">,</span>
+    <span class="n">RetryCallState</span><span class="p">,</span>
+    <span class="n">stop_after_attempt</span><span class="p">,</span>
+    <span class="n">wait_fixed</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">urllib3.util.url</span> <span class="kn">import</span> <span class="n">Url</span>
+
+<span class="kn">from</span> <span class="nn">kuebiko.utils.url</span> <span class="kn">import</span> <span class="n">use_http</span>
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">DEFAULT_RETRIES</span><span class="p">,</span> <span class="n">DEFAULT_RETRY_WAIT</span>
+<span class="kn">from</span> <span class="nn">.error_handling</span> <span class="kn">import</span> <span class="n">handle_webdriver_exception</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">BrowserCrashError</span><span class="p">,</span> <span class="n">PossibleSchemeError</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_log_retry_error_return_none</span><span class="p">(</span><span class="n">retry_state</span><span class="p">:</span> <span class="n">RetryCallState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Log Tenacity retry error and return `None`.&quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">retry_state</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>  <span class="c1"># This should raise an error</span>
+        <span class="n">retry_state</span><span class="o">.</span><span class="n">outcome</span> <span class="ow">and</span> <span class="n">retry_state</span><span class="o">.</span><span class="n">outcome</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">exc_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__qualname__</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retry of &#39;get_with_retry&#39; for &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; failed with </span><span class="si">{</span><span class="n">exc_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@retry</span><span class="p">(</span>
+    <span class="n">wait</span><span class="o">=</span><span class="n">wait_fixed</span><span class="p">(</span><span class="n">DEFAULT_RETRY_WAIT</span><span class="p">),</span>
+    <span class="n">retry</span><span class="o">=</span><span class="p">(</span>
+        <span class="n">retry_if_exception_type</span><span class="p">(</span><span class="n">TimeoutException</span><span class="p">)</span>
+        <span class="o">|</span> <span class="n">retry_if_exception_type</span><span class="p">(</span><span class="n">BrowserCrashError</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">before</span><span class="o">=</span><span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GET </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="n">before_sleep</span><span class="o">=</span><span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retry GET </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="n">retry_error_callback</span><span class="o">=</span><span class="n">_log_retry_error_return_none</span><span class="p">,</span>
+    <span class="n">stop</span><span class="o">=</span><span class="n">stop_after_attempt</span><span class="p">(</span><span class="n">DEFAULT_RETRIES</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_with_retry</span><span class="p">(</span>
+    <span class="n">driver_container</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">WebDriver</span><span class="p">],</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">,</span>
+    <span class="n">callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">WebDriver</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebDriver</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;GET `url` returning raw content response if successful and retrying if not.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">PossibleSchemeError</span><span class="p">:</span>  <span class="c1"># Retry with modified argument</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trying </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> with &#39;http://&#39; scheme&quot;</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">use_http</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get</span><span class="p">(</span><span class="n">driver_container</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+    <span class="n">driver_container</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">WebDriver</span><span class="p">],</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Url</span><span class="p">,</span>
+    <span class="n">callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">WebDriver</span><span class="p">],</span> <span class="n">WebDriver</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WebDriver</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;GET `url` returning raw content response if successful.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">driver_container</span><span class="p">()</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
+            <span class="n">callback</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">driver</span>
+    <span class="k">except</span> <span class="n">WebDriverException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">handle_webdriver_exception</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

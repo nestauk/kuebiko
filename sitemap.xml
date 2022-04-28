@@ -2,32 +2,47 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://nestauk.github.io/kuebiko/</loc>
-         <lastmod>2021-10-22</lastmod>
+         <lastmod>2022-04-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://nestauk.github.io/kuebiko/glossary/</loc>
-         <lastmod>2021-10-22</lastmod>
+         <lastmod>2022-04-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://nestauk.github.io/kuebiko/episodes/</loc>
-         <lastmod>2021-10-22</lastmod>
+         <lastmod>2022-04-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://nestauk.github.io/kuebiko/episodes/episode_01/</loc>
-         <lastmod>2021-10-22</lastmod>
+         <lastmod>2022-04-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://nestauk.github.io/kuebiko/episodes/episode_03/</loc>
+         <lastmod>2022-04-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://nestauk.github.io/kuebiko/episodes/episode_04/</loc>
+         <lastmod>2022-04-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://nestauk.github.io/kuebiko/episodes/episode_05/</loc>
+         <lastmod>2022-04-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://nestauk.github.io/kuebiko/guides/</loc>
-         <lastmod>2021-10-22</lastmod>
+         <lastmod>2022-04-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://nestauk.github.io/kuebiko/guides/metaflow/</loc>
-         <lastmod>2021-10-22</lastmod>
+         <lastmod>2022-04-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
