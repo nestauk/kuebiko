@@ -23,6 +23,8 @@ build-guide-docs: pycco
 serve-guide-docs: build-guide-docs
 	cd docs/ && mkdocs serve
 
+# NOTE: docs can be deployed with `cd docs/ && mkdocs gh-deploy`
+
 .PHONY: pycco
 pycco:
 	rm -r docs/guide/pycco || true
