@@ -88,6 +88,6 @@ def handle_webdriver_exception(exc: WebDriverException, url: Url) -> None:
         # E.g. "ERR_NAME_NOT_RESOLVED (-105)"
         return None
     else:
-        logging.error(f"Unknown error pathway @ {url}: {exc.msg}")
-        raise WebDriverException(*exc.args)
+        logging.error(f"Unknown error pathway @ {url}: {exc.msg} ({exc.args})")
+        raise exc
     return None

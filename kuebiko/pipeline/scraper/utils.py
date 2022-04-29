@@ -3,6 +3,7 @@ from typing import Any, Optional, Tuple, TypedDict
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.common.exceptions import WebDriverException
 from toolz import compose_left
 from urllib3.util.url import Url
 
@@ -63,7 +64,10 @@ def get_page(
     ## simple heuristic to indicate that a page has finished loading
     ## [1] https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
     callback = compose_left(dismiss_alerts, wait_for_readystate_complete)
-    driver = get_with_retry(driver_container, url, callback=callback)
+    try:
+        driver = get_with_retry(driver_container, url, callback=callback)
+    except WebDriverException:  # If an unexpected error arises don't crash everything
+        return str(url), None, None
 
     if driver is None:  # Couldn't get `url` for non-transient reason
         return str(url), None, None
