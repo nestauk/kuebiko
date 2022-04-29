@@ -1,5 +1,9 @@
 """Companies House data processing."""
+from io import BytesIO
+from zipfile import ZipFile
+
 import pandas as pd
+import requests
 
 
 COLUMN_MAPPINGS = {
@@ -26,12 +30,27 @@ COLUMN_MAPPINGS = {
 }
 
 
-def read_from_url(url: str) -> pd.DataFrame:
+def download_zip(url: str) -> ZipFile:
+    """Download a URL and load into `ZipFile`."""
+
+    ## `download_zip` also exists in the NSPL flow so should probably be a
+    ## project-level utility; however we duplicate here for pedagogical simplicity
+    response = requests.get(url)
+    response.raise_for_status()
+    return ZipFile(BytesIO(response.content), "r")
+
+
+def read_companies_house_chunk(zipfile: ZipFile) -> pd.DataFrame:
     """Read Companies House zipped CSV data-dump from url."""
-    return (
-        pd.read_csv(url, usecols=COLUMN_MAPPINGS.keys(), compression="zip")
-        .rename(columns=COLUMN_MAPPINGS)
-        .drop_duplicates()
+    n_files = len(zipfile.namelist())
+    if n_files != 1:
+        raise ValueError(
+            f"Expected zipfile {zipfile} to contain 1 file, found {n_files}"
+        )
+
+    zip_path = zipfile.namelist()[0]
+    return pd.read_csv(zipfile.open(zip_path), usecols=COLUMN_MAPPINGS.keys()).rename(
+        columns=COLUMN_MAPPINGS
     )
 
 

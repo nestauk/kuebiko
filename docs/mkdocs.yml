@@ -64,6 +64,9 @@ nav:
   - Episodes:
       - episodes/index.md
       - "01 - Metaflow basics": episodes/episode_01.md
+      - "03 - [Incomplete]": episodes/episode_03.md
+      - "04 - [Partially complete]": episodes/episode_04.md
+      - "05 - [Partially complete]": episodes/episode_05.md
   - Condensed guides:
       - "Metaflow": guides/metaflow.md
   - Glossary: glossary.md
